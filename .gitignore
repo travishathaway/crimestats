@@ -60,3 +60,9 @@ target/
 crimestats/settings.py
 *.ipynb
 *.swp
+
+frontend/node_modules
+frontend/bower_components
+frontend/.tmp
+frontend/.sass-cache
+

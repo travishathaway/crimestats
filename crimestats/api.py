@@ -55,6 +55,34 @@ class CrimeStatsAPI(Resource):
  
         data = df.reset_index(level=0).to_dict(orient='split')
     
+        results = {}
+        results['cols'] = []
+        results['rows'] = []
+
+        for col in data['columns']:
+            if col == 'date':
+                results['cols'].append({
+                    "id": col,
+                    "type": "date",
+                    "label": col
+                })
+            else:
+                results['cols'].append({
+                    "id": col,
+                    "type": "number",
+                    "label": col
+                })
+
+        for row in data['data']:
+            r = []
+            for val in row:
+                r.append({
+                    "v": val
+                })
+            results['rows'].append({
+                "c": r
+            })
+
         return {
-            'graph_data': data
+            'results': results 
         }

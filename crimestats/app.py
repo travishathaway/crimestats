@@ -7,7 +7,7 @@ import settings
 from api import CrimeStatsAPI
 
 app = Flask(__name__)
-api = Api(app)
+api = Api(app, prefix='/api')
 
 db_uri = 'postgresql://{user}:{pass}@{host}:{port}/{database}'.format(
     **settings.DB_CONFIG
@@ -18,7 +18,6 @@ db = SQLAlchemy(app)
 
 from models import CrimeStats, CrimeStatsYearMonth
 
-app.add_url_rule('/', 'index', views.index)
 api.add_resource(CrimeStatsAPI, '/crime_stats')
 
 
