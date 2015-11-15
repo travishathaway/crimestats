@@ -15,7 +15,7 @@ db_uri = 'postgresql://{user}:{pass}@{host}:{port}/{database}'.format(
 app.config['SQLALCHEMY_DATABASE_URI'] = db_uri
 db = SQLAlchemy(app)
 
-from models import CrimeStats, CrimeStatsYearMonth
+from models import CrimeStats, CrimeStatsYearMonth, IncidentCount
 
 api.add_resource(CrimeStatsAPI, '/crime_stats')
 
@@ -24,4 +24,5 @@ api.add_resource(CrimeStatsAPI, '/crime_stats')
 def before_request():
     g.db = db
     g.CrimeStats = CrimeStats
+    g.IncidentCount = IncidentCount
     g.CrimeStatsYearMonth = CrimeStatsYearMonth

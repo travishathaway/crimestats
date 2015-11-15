@@ -52,3 +52,13 @@ class CrimeStatsYearMonth(db.Model):
             'date': self.date.isoformat(),
             'count': self.count
         }
+
+
+class IncidentCount(db.Model):
+    __tablename__ = 'incident_counts'
+
+    date = db.Column(db.Date, nullable=False, primary_key=True)
+    major_offense_type = db.Column(db.String, primary_key=True)
+    neighborhood = db.Column(db.String, primary_key=True)
+    police_precinct = db.Column(db.String, primary_key=True)
+    count = db.Column(db.Integer, nullable=False)
