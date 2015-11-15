@@ -2,7 +2,6 @@ from flask import Flask, g
 from flask_restful import Api
 from flask_sqlalchemy import SQLAlchemy
 
-import views
 import settings
 from api import CrimeStatsAPI
 

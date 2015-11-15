@@ -1,3 +1,18 @@
 <h1>Crime Stats</h1>
 
-<div google-chart chart="chart" style="{{chart.cssStyle}}" />
+<div class="row">
+    <div class="col-md-2" >
+        <h3>Offense Types</h3>
+        <div style="overflow-y: scroll; height: 400px">
+            <div ng-repeat="type in major_offense_types">
+                <button type="button" class="btn btn-default" ng-change="updateChart()"
+                        ng-model="major_offense_type_choices[type]" bs-checkbox>
+                    {{ type }}
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-10">
+        <div google-chart chart="chart" style="{{chart.cssStyle}}" />
+    </div>
+</div>

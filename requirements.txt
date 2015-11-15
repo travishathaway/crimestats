@@ -1,3 +1,5 @@
 flask
-webargs
 flask_restful
+flask_sqlalchemy
+webargs
+pandas

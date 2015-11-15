@@ -1,50 +1,12 @@
-from sqlalchemy.dialects import postgresql
+import pandas as pd
+
 from flask import g
 from flask_restful import Resource
 from webargs import fields
 from webargs.flaskparser import use_args 
-import pandas as pd
 
-
-def format_for_google_chart(df):
-    """
-    Formats a Pandas data frame for use in Angular Google
-    Charts.
-
-    :param df: pandas.Dataframe
-    :returns: Dictionary
-    """
-    data = df.to_dict(orient='split')
-
-    results = {}
-    results['cols'] = []
-    results['rows'] = []
-
-    for col in data['columns']:
-        if col == 'date':
-            results['cols'].append({
-                "id": col,
-                "type": "date",
-                "label": col
-            })
-        else:
-            results['cols'].append({
-                "id": col,
-                "type": "number",
-                "label": col
-            })
-
-    for row in data['data']:
-        r = []
-        for val in row:
-            r.append({
-                "v": val
-            })
-        results['rows'].append({
-            "c": r
-        })
-
-    return results
+import utils as u_
+from .constants import MAJOR_OFFENSE_TYPES
 
 
 class CrimeStatsAPI(Resource):
@@ -86,8 +48,10 @@ class CrimeStatsAPI(Resource):
  
         df = df.reset_index(level=0)
 
-        results = format_for_google_chart(df)
+        results, cols = u_.format_for_google_chart(df)
 
         return {
-            'results': results 
+            'major_offense_types': MAJOR_OFFENSE_TYPES,
+            'cols': cols,
+            'graph_data': results
         }
