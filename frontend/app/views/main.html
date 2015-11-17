@@ -1,7 +1,9 @@
-<h1>Crime Stats</h1>
-
 <div class="row">
     <div class="col-md-3">
+        <h1>Crime Stats</h1>
+    </div>
+    <div class="col-md-3">
+        <br>
         <ul class="nav nav-pills">
             <li ng-class="{'active': group_by == 'major_offense_type'}">
                 <a href="#/?group_by=major_offense_type">Offense Type</a>
@@ -12,7 +14,8 @@
         </ul>
     </div>
     <div class="col-md-6">
-         <div class="form-group">
+        <br>
+        <div class="form-group">
             <div class="form-group col-xs-6">
                 <input type="text" class="form-control" ng-model="start_date"
                        data-max-date="{{end_date}}" placeholder="From" bs-datepicker
@@ -25,26 +28,27 @@
             </div>
         </div>
     </div>
-    <div class="col-md-3">
-        <button class="btn btn-primary" ng-click="updateChart()">Update</button>
-    </div>
 </div>
+<hr>
 <div class="row">
-    <div class="col-md-2" >
-        <h3>{{group_by_titles[group_by]}}</h3>
+    <div class="col-md-12">
         <span ng-repeat="type in group_by_cols">
-            <button type="button" class="btn btn-xs btn-default" ng-change="updateChart()"
+            <button type="button" class="btn btn-sm btn-default" ng-change="updateChart()"
                     ng-model="group_by_choices[type]" bs-checkbox>
                 {{ type }}
             </button>
         </span>
     </div>
-    <div class="col-md-10">
+</div>
+<hr>
+<div class="row">
+    <div class="col-md-12">
         <div google-chart chart="chart" style="{{chart.cssStyle}}" />
     </div>
 </div>
+<hr>
 <div class="row">
-    <div class="col-md-offset-2 col-md-10">
+    <div class="col-md-12">
         <div google-chart chart="tableChart" style="{{tableChart.cssStyle}}" />
     </div>
 </div>

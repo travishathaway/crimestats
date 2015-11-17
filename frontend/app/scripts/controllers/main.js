@@ -51,7 +51,7 @@ angular.module('crimestatsApp').controller(
             for(var x = 0; x < $scope.group_by_cols.length; x++){
               var o_type = $scope.group_by_cols[x];
 
-              if($.inArray(o_type, data.cols) >= 0 && x === 0){
+              if($.inArray(o_type, data.cols) >= 0 && (x >= 0 && x < 3)){
                 $scope.group_by_choices[o_type] = true;
               } else {
                 $scope.group_by_choices[o_type] = false;
