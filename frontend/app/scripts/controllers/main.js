@@ -22,6 +22,25 @@ angular.module('crimestatsApp').controller(
       $scope.end_date_max = '';
       $scope.start_date_min = '';
 
+      // Watchers
+      $scope.$watch('start_date', function(newVal, oldVal){
+        if(newVal){
+          if($scope.end_date){
+            $scope.updateChart();
+          }
+        }
+      });
+
+      $scope.$watch('end_date', function(newVal, oldVal){
+        if(newVal){
+          if($scope.start_date){
+            $scope.updateChart();
+          }
+        }
+      });
+
+      // Functions
+
       $scope.reloadData = function(){
         $http({url: '/api/crime_stats', params: $scope.queryParams}).success(function(data){
           $scope.group_by_choices = {};
@@ -74,17 +93,62 @@ angular.module('crimestatsApp').controller(
 
       $scope.reloadData();
 
-      $scope.updateChart = function(){
-        var chartData = angular.copy($scope.allChartData);
+      $scope.filterByDate = function(chartData){
+        var start_date_pos;
+        var end_date_pos;
+
+        start_date_pos = $scope.getDatePos($scope.start_date, chartData);
+        end_date_pos = $scope.getDatePos($scope.end_date, chartData);
+
+        return $scope.getChartDataSubset(
+          start_date_pos, end_date_pos, chartData
+        );
+      }
+
+      $scope.getChartDataSubset = function(start_pos, end_pos, chartData){
+        // Remove starting elements
+        chartData.data.rows.splice(0, start_pos);
+
+        // Remove ending elements
+        chartData.data.rows.splice(end_pos, chartData.data.rows.length);
+
+        return chartData;
+      }
+
+      $scope.getDatePos = function(date, chartData){
+        for(var x = 0; x < chartData.data.rows.length; x++){
+          var year = chartData.data.rows[x].c[0].v.getYear();
+          var month = chartData.data.rows[x].c[0].v.getMonth();
+
+          if(date.getYear() == year && date.getMonth() == month){
+            return x;
+          }
+        }
+      }
+
+      $scope.filterColumns = function(chartData){
         var removeCols = $scope.getNotSelectedCols();
 
         for(var x = 0; x < removeCols.length; x++){
           $scope.removeField(removeCols[x], chartData);
         }
 
-        $scope.chart = chartData;
+        return chartData;
+      }
+
+      $scope.updateChart = function(){
+        var chartData = angular.copy($scope.allChartData);
+        chartData = $scope.filterColumns(chartData);
+
+        if($scope.start_date && $scope.end_date){
+          chartData = $scope.filterByDate(chartData);
+        }
+
         var tableChart = angular.copy(chartData);
         tableChart.type = "Table";
+
+        // Update charts
+        $scope.chart = chartData;
         $scope.tableChart = tableChart;
       }
 
@@ -119,7 +183,7 @@ angular.module('crimestatsApp').controller(
       }
 
       $scope.removeRows = function(pos, chartData){
-        for(var x = 1; x < chartData.data.rows.length; x++){
+        for(var x = 0; x < chartData.data.rows.length; x++){
           chartData.data.rows[x].c.splice(pos, 1);
         }
       }

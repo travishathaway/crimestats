@@ -14,19 +14,19 @@
     <div class="col-md-6">
          <div class="form-group">
             <div class="form-group col-xs-6">
-                <input type="text" class="form-control" ng-model="queryParams.start_date"
-                       data-max-date="{{queryParams.end_date}}" placeholder="From" bs-datepicker
+                <input type="text" class="form-control" ng-model="start_date"
+                       data-max-date="{{end_date}}" placeholder="From" bs-datepicker
                        model-date-format="yyyy-MM-dd" min-view="1" autoclose="1">
             </div>
             <div class="form-group col-xs-6">
-                <input type="text" class="form-control" ng-model="queryParams.end_date"
-                       data-min-date="{{queryParams.start_date}}" placeholder="Until" bs-datepicker
+                <input type="text" class="form-control" ng-model="end_date"
+                       data-min-date="{{start_date}}" placeholder="Until" bs-datepicker
                        model-date-format="yyyy-MM-dd" min-view="1" autoclose="1">
             </div>
         </div>
     </div>
     <div class="col-md-3">
-        <button class="btn btn-primary" ng-click="reloadData()">Update</button>
+        <button class="btn btn-primary" ng-click="updateChart()">Update</button>
     </div>
 </div>
 <div class="row">
