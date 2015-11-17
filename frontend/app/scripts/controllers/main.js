@@ -12,8 +12,6 @@ angular.module('crimestatsApp').controller(
     '$scope', '$http', '$routeParams',
     function ($scope, $http, $routeParams) {
       $scope.group_by = $routeParams.group_by || 'major_offense_type';
-      $scope.group_by_choices = {};
-      $scope.allChartData = {};
       $scope.queryParams = {
         'group_by': $scope.group_by
       };
@@ -21,58 +19,55 @@ angular.module('crimestatsApp').controller(
         'neighborhood': 'Neighborhood',
         'major_offense_type': 'Offense Type'
       }
+      $scope.end_date_max = '';
+      $scope.start_date_min = '';
 
       $scope.reloadData = function(){
         $http({url: '/api/crime_stats', params: $scope.queryParams}).success(function(data){
-
+          $scope.group_by_choices = {};
+          $scope.allChartData = {};
           $scope.group_by_cols = data.cols;
 
-          for(var x = 0; x < $scope.group_by_cols.length; x++){
+          if($.isEmptyObject($scope.group_by_choices)){
+            for(var x = 0; x < $scope.group_by_cols.length; x++){
               var o_type = $scope.group_by_cols[x];
 
               if($.inArray(o_type, data.cols) >= 0 && x === 0){
-                  $scope.group_by_choices[o_type] = true;
+                $scope.group_by_choices[o_type] = true;
               } else {
-                  $scope.group_by_choices[o_type] = false;
+                $scope.group_by_choices[o_type] = false;
               }
+            }
           }
 
           var rows = [];
           for(var x = 0; x < data.graph_data.rows.length; x++){
-              var row;
-              row = data.graph_data.rows[x];
-              row.c[0].v = new Date(row.c[0].v);
-              rows.push(row);
+            var row;
+            row = data.graph_data.rows[x];
+            row.c[0].v = new Date(row.c[0].v);
+            rows.push(row);
           }
 
-          var chart1 = {};
-          chart1.type = "LineChart";
-          chart1.data = {
-              cols: data.graph_data.cols,
-              rows: rows
+          $scope.allChartData = {};
+          $scope.allChartData.type = "LineChart";
+          $scope.allChartData.data = {
+            cols: data.graph_data.cols,
+            rows: rows
           };
 
-          chart1.cssStyle = "height:500px; width: 100%";
-          chart1.options = {
-              "title": "Crime Incidents per month",
-              "fill": 20,
-              "displayExactValues": true,
-              "hAxis": {
-                  "title": "Date"
-              }
+          $scope.allChartData.cssStyle = "height:500px; width: 100%";
+          $scope.allChartData.options = {
+            "title": "Crime Incidents per month",
+            "fill": 20,
+            "displayExactValues": true,
+            "hAxis": {
+              "title": "Date"
+            },
+            "vAxis": {
+              "title": "Incident Count"
+            }
           };
 
-          chart1.formatters = {
-            "date": [
-              {
-                "columnNum": 0,
-                "format": "MMM YYYY",
-                "formatType": "long"
-              }
-            ]
-          };
-
-          $scope.allChartData = chart1;
           $scope.updateChart();
         })
       }

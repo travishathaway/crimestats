@@ -1,7 +1,7 @@
 <h1>Crime Stats</h1>
 
 <div class="row">
-    <div class="col-md-12">
+    <div class="col-md-3">
         <ul class="nav nav-pills">
             <li ng-class="{'active': group_by == 'major_offense_type'}">
                 <a href="#/?group_by=major_offense_type">Offense Type</a>
@@ -11,18 +11,33 @@
             </li>
         </ul>
     </div>
+    <div class="col-md-6">
+         <div class="form-group">
+            <div class="form-group col-xs-6">
+                <input type="text" class="form-control" ng-model="queryParams.start_date"
+                       data-max-date="{{queryParams.end_date}}" placeholder="From" bs-datepicker
+                       model-date-format="yyyy-MM-dd" min-view="1" autoclose="1">
+            </div>
+            <div class="form-group col-xs-6">
+                <input type="text" class="form-control" ng-model="queryParams.end_date"
+                       data-min-date="{{queryParams.start_date}}" placeholder="Until" bs-datepicker
+                       model-date-format="yyyy-MM-dd" min-view="1" autoclose="1">
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <button class="btn btn-primary" ng-click="reloadData()">Update</button>
+    </div>
 </div>
 <div class="row">
     <div class="col-md-2" >
         <h3>{{group_by_titles[group_by]}}</h3>
-        <div style="overflow-y: scroll; height: 400px">
-            <div ng-repeat="type in group_by_cols">
-                <button type="button" class="btn btn-default" ng-change="updateChart()"
-                        ng-model="group_by_choices[type]" bs-checkbox>
-                    {{ type }}
-                </button>
-            </div>
-        </div>
+        <span ng-repeat="type in group_by_cols">
+            <button type="button" class="btn btn-xs btn-default" ng-change="updateChart()"
+                    ng-model="group_by_choices[type]" bs-checkbox>
+                {{ type }}
+            </button>
+        </span>
     </div>
     <div class="col-md-10">
         <div google-chart chart="chart" style="{{chart.cssStyle}}" />

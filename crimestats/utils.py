@@ -1,3 +1,4 @@
+import datetime
 __author__ = 'thath'
 
 
@@ -41,3 +42,9 @@ def format_for_google_chart(df):
         })
 
     return results, data['columns']
+
+
+def string_to_date(format='%Y-%m-%d'):
+    def convert(d_input):
+        return datetime.strptime(d_input, format) if d_input else None
+    return convert

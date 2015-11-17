@@ -31,6 +31,12 @@ class CrimeStatsAPI(Resource):
     crime_stats_args = {
         'group_by': fields.Str(
             validate=validate_group_by
+        ),
+        'start_date': fields.Str(
+            use=u_.string_to_date()
+        ),
+        'end_date': fields.Str(
+            use=u_.string_to_date()
         )
     }
 
@@ -41,6 +47,8 @@ class CrimeStatsAPI(Resource):
         :return:
         """
         ses = g.db.session
+        cols = []
+        results = []
         group_by_col = getattr(g.IncidentCount, args.get('group_by') or 'major_offense_type')
 
         query = ses.query(
@@ -49,32 +57,37 @@ class CrimeStatsAPI(Resource):
             func.sum(g.IncidentCount.count).label('count')
         )
 
+        if args.get('start_date'):
+            query = query.filter(
+                g.IncidentCount.date >= args.get('start_date')
+            )
+
+        if args.get('end_date'):
+            query = query.filter(
+                g.IncidentCount.date <= args.get('end_date')
+            )
+
         query = query.group_by(
             group_by_col, g.IncidentCount.date
-        )
-        query = query.filter(
-            g.IncidentCount.count >= 3
         )
 
         # Let pandas execute the SQL statement to load it straight in to
         # the Dataframe.
         df = pd.read_sql_query(query.selectable, g.db.engine)
-        # datetime.date objects are not JSON serializable
-        df['date'] = df['date'].apply(lambda x: str(x))
+        if not df.empty:
+            # datetime.date objects are not JSON serializable
+            df['date'] = df['date'].apply(lambda x: str(x))
 
-        df = df.pivot_table(
-            index=['date'], columns=['group_by_col']
-        ).fillna(0)['count']
- 
-        df = df.reset_index(level=0)
+            df = df.pivot_table(
+                index=['date'], columns=['group_by_col']
+            ).fillna(0)['count']
 
-        results, cols = u_.format_for_google_chart(df)
-
-        # Remove the date column
-        cols.pop(0)
+            df = df.reset_index(level=0)
+            results, cols = u_.format_for_google_chart(df)
+            # Remove the date column
+            cols.pop(0)
 
         return {
-            'major_offense_types': MAJOR_OFFENSE_TYPES,
             'cols': cols,
             'graph_data': results
         }
