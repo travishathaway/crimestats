@@ -1,13 +1,13 @@
-import pandas as pd
+from __future__ import absolute_import
 
+import pandas as pd
 from flask import g
 from flask_restful import Resource
 from webargs import fields
 from webargs.flaskparser import use_args
 from sqlalchemy import func
 
-import utils as u_
-from .constants import MAJOR_OFFENSE_TYPES
+from . import utils as u_
 
 
 def validate_group_by(value):
@@ -37,13 +37,16 @@ class CrimeStatsAPI(Resource):
         ),
         'end_date': fields.Str(
             use=u_.string_to_date()
+        ),
+        'content_type': fields.Str(
+            load_from='Content-Type',
+            location='headers'
         )
     }
 
     @use_args(crime_stats_args)
     def get(self, args):
         """
-
         :return:
         """
         ses = g.db.session
@@ -87,7 +90,10 @@ class CrimeStatsAPI(Resource):
             # Remove the date column
             cols.pop(0)
 
-        return {
-            'cols': cols,
-            'graph_data': results
-        }
+        if args.get('content_type') == 'text/csv':
+            return df
+        else:
+            return {
+                'cols': cols,
+                'graph_data': results
+            }

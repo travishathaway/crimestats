@@ -149,7 +149,6 @@ angular.module('crimestatsApp').controller(
 
         // Update charts
         $scope.chart = chartData;
-        $scope.tableChart = tableChart;
       }
 
       $scope.getNotSelectedCols = function(){

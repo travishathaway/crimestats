@@ -1,21 +1,25 @@
+from __future__ import absolute_import
+
 from flask import Flask, g
-from flask_restful import Api
+import flask_restful
 from flask_sqlalchemy import SQLAlchemy
 
-import settings
-from api import CrimeStatsAPI
+from . import settings
+from .api import CrimeStatsAPI
 
 app = Flask(__name__)
-api = Api(app, prefix='/api')
 
 db_uri = 'postgresql://{user}:{pass}@{host}:{port}/{database}'.format(
     **settings.DB_CONFIG
 )
 
+
+api = flask_restful.Api(app, prefix='/api')
+
 app.config['SQLALCHEMY_DATABASE_URI'] = db_uri
 db = SQLAlchemy(app)
 
-from models import CrimeStats, CrimeStatsYearMonth, IncidentCount
+from .models import CrimeStats, CrimeStatsYearMonth, IncidentCount
 
 api.add_resource(CrimeStatsAPI, '/crime_stats')
 
