@@ -14,14 +14,20 @@ angular
     'ngRoute',
     'ngSanitize',
     'googlechart',
-    'mgcrea.ngStrap'
+    'mgcrea.ngStrap',
+    'ui.slimscroll'
   ])
   .config(function ($routeProvider) {
     $routeProvider
       .when('/', {
-        templateUrl: 'views/main.html',
-        controller: 'MainCtrl',
-        controllerAs: 'main'
+        templateUrl: 'views/index.html',
+        controller: 'IndexCtrl',
+        controllerAs: 'index'
+      })
+      .when('/offense-type', {
+        templateUrl: 'views/offense_type.html',
+        controller: 'OffenseTypeCtrl',
+        controllerAs: 'offense_type'
       })
       .otherwise({
         redirectTo: '/'

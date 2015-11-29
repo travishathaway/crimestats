@@ -8,20 +8,22 @@
     <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
     <!-- build:css(.) styles/vendor.css -->
     <!-- bower:css -->
+    <link rel="stylesheet" href="bower_components/awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css" />
     <!-- endbower -->
     <!-- endbuild -->
     <!-- build:css(.tmp) styles/main.css -->
     <link rel="stylesheet" href="styles/main.css">
     <!-- endbuild -->
   </head>
-  <body ng-app="crimestatsApp" style="background-color: #bbb">
+  <body ng-app="crimestatsApp">
     <!--[if lte IE 8]>
       <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
     <![endif]-->
 
     <!-- Add your site or application content here -->
+    <ng-include src="'views/header.html'"></ng-include>
     <div class="container-fluid">
-    <div ng-view=""></div>
+      <div ng-view=""></div>
     </div>
 
     <!-- Google Analytics: change UA-XXXXX-X to be your site's ID -->
@@ -57,8 +59,10 @@
     <script src="bower_components/angular-google-chart/ng-google-chart.js"></script>
     <script src="bower_components/angular-strap/dist/angular-strap.js"></script>
     <script src="bower_components/angular-strap/dist/angular-strap.tpl.js"></script>
+    <script src="bower_components/angular-slimscroll/angular-slimscroll.js"></script>
     <!-- endbower -->
     <!-- endbuild -->
+    <script src="bower_components/slimScroll/jquery.slimscroll.min.js"></script>
 
         <!-- build:js({.tmp,app}) scripts/scripts.js -->
         <script src="scripts/app.js"></script>

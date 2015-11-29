@@ -8,7 +8,23 @@
  * Controller of the crimestatsApp
  */
 angular.module('crimestatsApp').controller(
-  'MainCtrl', [
+  'HeaderCtrl', [
+    '$scope',
+    function ($scope) {
+      $scope.menu = [
+        {
+          'display_name': 'Offense Types',
+          'link': '#/offense-type'
+        },
+        {
+          'display_name': 'About',
+          'link': '#/about'
+        }
+      ];
+    }
+  ]
+).controller(
+  'OffenseTypeCtrl', [
     '$scope', '$http', '$routeParams',
     function ($scope, $http, $routeParams) {
       $scope.group_by = $routeParams.group_by || 'major_offense_type';
@@ -84,6 +100,13 @@ angular.module('crimestatsApp').controller(
             },
             "vAxis": {
               "title": "Incident Count"
+            },
+            'chartArea':{
+              'width': '80%',
+              'height': '80%'
+            },
+            'legend': {
+              'position': 'bottom'
             }
           };
 
@@ -186,6 +209,13 @@ angular.module('crimestatsApp').controller(
           chartData.data.rows[x].c.splice(pos, 1);
         }
       }
+    }
+  ]
+).controller(
+  'IndexCtrl', [
+    '$scope', '$http', '$routeParams',
+    function ($scope, $http, $routeParams) {
+      $scope.title = 'Browse Neighborhood';
     }
   ]
 );
