@@ -54,11 +54,28 @@ body {
 .jumbotron {
   text-align: center;
   border-bottom: 1px solid #e5e5e5;
+  padding:0;
+  margin-top: -20px;
 
   .btn {
     font-size: 21px;
     padding: 14px 24px;
   }
+
+  .opacity-layer {
+    background-color: rgba(0, 0, 0, 0.75);
+    padding: 48px 30px;
+    color: white;
+
+    p, p.lead {
+      font-weight: bold;
+    }
+  }
+}
+
+.background-portland {
+  background-image: url('../images/portland_panorama_smaller.jpg');
+  background-size: cover;
 }
 
 /* Supporting marketing content */
@@ -111,3 +128,14 @@ body {
   border-radius: 0px;
 }
 /* End NavBar Overrides */
+
+/* Loading message */
+.loading-message {
+  text-align: center;
+  margin-top: 10%;
+}
+
+.loading-message-large {
+  font-size: 1.8em;
+}
+/* End Loading message */

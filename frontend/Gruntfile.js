@@ -426,7 +426,7 @@ module.exports = function (grunt) {
           src: [
             '*.{ico,png,txt}',
             '*.html',
-            'images/{,*/}*.{webp}',
+            'images/{,*/}*.{jpg,png}',
             'fonts/{,*/}*.*'
           ]
         }, {
@@ -464,7 +464,7 @@ module.exports = function (grunt) {
       ],
       dist: [
         'compass:dist',
-        'imagemin',
+        //'imagemin',
         'svgmin'
       ]
     },

@@ -21,10 +21,19 @@
                     {{type}}
                 </label>
             </div>
+            <div ng-if="!group_by_cols.length" class="loading-message">
+                <div>Loading</div>
+                <i class="fa fa-refresh fa-spin"></i>
+            </div>
         </div>
     </div>
     <div class="col-md-10">
-        <div google-chart chart="chart" style="{{chart.cssStyle}}" />
+        <div google-chart chart="chart" style="{{chart.cssStyle}}">
+            <div class="loading-message loading-message-large">
+                <div>Loading</div>
+                <i class="fa fa-refresh fa-spin"></i>
+            </div>
+        </div>
     </div>
 </div>
 <hr>
