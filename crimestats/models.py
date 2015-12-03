@@ -1,4 +1,5 @@
 from .app import db
+from sqlalchemy.orm import relationship
 
 
 class CrimeStats(db.Model):
@@ -62,3 +63,13 @@ class IncidentCount(db.Model):
     neighborhood = db.Column(db.String, primary_key=True)
     police_precinct = db.Column(db.String, primary_key=True)
     count = db.Column(db.Integer, nullable=False)
+    population = relationship("PortlandPopulation", uselist=False,
+                              backref="incident_counts")
+
+
+class PortlandPopulation(db.Model):
+    __tablename__ = 'portland_population_2000_2014'
+
+    index = db.Column(db.Integer, primary_key=True)
+    date = db.Column(db.Date, db.ForeignKey('incident_counts.date'), nullable=False)
+    pop = db.Column(db.Integer, nullable=False)

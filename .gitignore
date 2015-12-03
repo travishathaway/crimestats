@@ -57,8 +57,8 @@ docs/_build/
 target/
 
 # Custom Stuff
-*.ipynb
 *.swp
+.ipynb_checkpoints
 
 frontend/node_modules
 frontend/bower_components
