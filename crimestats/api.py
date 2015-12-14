@@ -10,38 +10,16 @@ from sqlalchemy import func
 from . import utils as u_
 
 
-def validate_group_by(value):
-    """
-    Validate the group_by field.
-
-    :param value: String
-    :return: String
-    :raises: ValueError
-    """
-    if value not in CrimeStatsAPI.INCIDENT_GROUP_BY:
-        raise ValueError(
-            "'group_by' must appear in {}".format(CrimeStatsAPI.INCIDENT_GROUP_BY)
-        )
-    return value
-
-
 class CrimeStatsAPI(Resource):
-    INCIDENT_GROUP_BY = ('major_offense_type', 'neighborhood', 'police_precinct')
 
     crime_stats_args = {
-        'group_by': fields.Str(
-            validate=validate_group_by
-        ),
         'start_date': fields.Str(
             use=u_.string_to_date()
         ),
         'end_date': fields.Str(
             use=u_.string_to_date()
         ),
-        'content_type': fields.Str(
-            load_from='Content-Type',
-            location='headers'
-        )
+        'neighborhood': fields.Str()
     }
 
     @use_args(crime_stats_args)
@@ -52,7 +30,7 @@ class CrimeStatsAPI(Resource):
         ses = g.db.session
         cols = []
         results = []
-        group_by_col = getattr(g.IncidentCount, args.get('group_by') or 'major_offense_type')
+        group_by_col = g.IncidentCount.major_offense_type
 
         query = ses.query(
             g.IncidentCount.date.label('date'),
@@ -68,6 +46,11 @@ class CrimeStatsAPI(Resource):
         if args.get('end_date'):
             query = query.filter(
                 g.IncidentCount.date <= args.get('end_date')
+            )
+
+        if args.get('neighborhood'):
+            query = query.filter(
+                g.IncidentCount.neighborhood == args.get('neighborhood')
             )
 
         query = query.group_by(
@@ -90,10 +73,37 @@ class CrimeStatsAPI(Resource):
             # Remove the date column
             cols.pop(0)
 
-        if args.get('content_type') == 'text/csv':
-            return df
-        else:
-            return {
-                'cols': cols,
-                'graph_data': results
-            }
+        return {
+            'cols': cols,
+            'graph_data': results
+        }
+
+
+class NeighborhoodsAPI(Resource):
+    # We use this to keep out neighborhoods with low counts
+    COUNT_THRESHOLD = 250
+
+    def get(self, *args, **kwargs):
+        """
+        Retrieve a list of neighborhoods in Portland, Oregon
+        :param args:
+        :param kwargs:
+        :return: Dictionary
+        """
+        cte_query = g.db.session.query(
+            g.IncidentCount.neighborhood, func.sum(g.IncidentCount.count).label('count')
+        ).group_by(g.IncidentCount.neighborhood).cte(name='hood_counts')
+
+        results = g.db.session.query(
+            cte_query.c.neighborhood, cte_query.c.count
+        ).filter(
+            cte_query.c.count > 250
+        ).filter(
+            cte_query.c.neighborhood != None
+        ).order_by(
+            cte_query.c.neighborhood
+        ).all()
+
+        return {
+            'data': [r[0] for r in results]
+        }

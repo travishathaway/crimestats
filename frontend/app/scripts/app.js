@@ -24,6 +24,16 @@ angular
         controller: 'IndexCtrl',
         controllerAs: 'index'
       })
+      .when('/neighborhoods', {
+        templateUrl: 'views/neighborhoods/list.html',
+        controller: 'NeighborhoodListCtrl',
+        controllerAs: 'neighborhood_list'
+      })
+      .when('/neighborhoods/:neighborhood', {
+        templateUrl: 'views/neighborhoods/view.html',
+        controller: 'NeighborhoodViewCtrl',
+        controllerAs: 'neighborhood_view'
+      })
       .when('/offense-type', {
         templateUrl: 'views/offense_type.html',
         controller: 'OffenseTypeCtrl',
