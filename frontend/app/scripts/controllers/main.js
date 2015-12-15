@@ -36,9 +36,10 @@ angular.module('crimestatsApp').controller(
   ]
 ).controller(
   'NeighborhoodViewCtrl', [
-    '$scope', '$routeParams',
-    function($scope, $routeParams){
+    '$scope', '$routeParams', 'offensetype',
+    function($scope, $routeParams, offensetype){
       $scope.neighborhood = $routeParams.neighborhood;
+      $scope.offensetype = offensetype;
     }
   ]
 ).controller(

@@ -7,138 +7,191 @@
  * # OffenseType
  */
 angular.module('crimestatsApp')
-  .directive('offenseType', ['$http', function ($http) {
-    return {
-      scope: {
-        neighborhood: '='
-      },
-      templateUrl: 'views/directives/offense_type.html',
-      restrict: 'E',
-      link: function postLink(scope, element, attrs) {
-        scope.reloadData = function(){
-          if( scope.neighborhood == 'all'){
-            var neighborhood = '';
-          } else {
-            var neighborhood = scope.neighborhood;
+  .directive('offenseType', [
+    '$http',
+    'offensetype',
+    function ($http, offensetype) {
+      return {
+        scope: {
+          neighborhood: '=',
+          chartType: '@',
+        },
+        templateUrl: 'views/directives/offense_type.html',
+        restrict: 'E',
+        link: function postLink(scope, element, attrs) {
+          scope.aggPeriod = 'year';
+          scope.loading = true;
+
+          scope.getChartTitle = function(){
+            if(scope.aggPeriod){
+              if(scope.aggPeriod.toLowerCase() === 'year'){
+                return 'Crime Incidents Per Year';
+              } else if(scope.aggPeriod.toLowerCase() === 'month'){
+                return 'Crime Incidents Per Month';
+              } else {
+                return 'Unknown';
+              }
+            }
           }
 
-          $http({url: '/api/crime_stats', params: {'neighborhood': neighborhood}}).success(function(data){
-            scope.group_by_choices = {};
-            scope.allChartData = {};
-            scope.group_by_cols = data.cols;
+          scope.$watch('aggPeriod', function(newVal, oldVal){
+            if(newVal){
+              if(newVal != oldVal){
+                scope.loading = true;
+                scope.reloadData();
+              }
+            }
+          });
 
-            if($.isEmptyObject(scope.group_by_choices)){
-              for(var x = 0; x < scope.group_by_cols.length; x++){
-                var o_type = scope.group_by_cols[x];
+          scope.$watch('start_date', function(newVal, oldVal){
+            if(newVal){
+              if(scope.end_date){
+                scope.updateChart();
+              }
+            }
+          });
 
-                if($.inArray(o_type, data.cols) >= 0 && (x >= 0 && x < 3)){
-                  scope.group_by_choices[o_type] = true;
-                } else {
-                  scope.group_by_choices[o_type] = false;
+          scope.$watch('end_date', function(newVal, oldVal){
+            if(newVal){
+              if(scope.start_date){
+                scope.updateChart();
+              }
+            }
+          });
+
+          scope.reloadData = function(){
+            if( scope.neighborhood == 'all'){
+              var neighborhood = '';
+            } else {
+              var neighborhood = scope.neighborhood;
+            }
+
+            var params = {
+              'neighborhood': neighborhood,
+              'agg_period': scope.aggPeriod
+            };
+
+            offensetype.get(params).then(function(data){
+              var data = data.data;
+
+              scope.group_by_choices = {};
+              scope.allChartData = {};
+              scope.group_by_cols = data.cols;
+
+              if($.isEmptyObject(scope.group_by_choices)){
+                for(var x = 0; x < scope.group_by_cols.length; x++){
+                  var o_type = scope.group_by_cols[x];
+
+                  if($.inArray(o_type, data.cols) >= 0 && (x >= 0 && x < 1)){
+                    scope.group_by_choices[o_type] = true;
+                  } else {
+                    scope.group_by_choices[o_type] = false;
+                  }
                 }
               }
-            }
 
-            var rows = [];
-            for(var x = 0; x < data.graph_data.rows.length; x++){
-              var row;
-              row = data.graph_data.rows[x];
-              row.c[0].v = new Date(row.c[0].v);
-              rows.push(row);
-            }
-
-            scope.allChartData = {};
-            scope.allChartData.type = "LineChart";
-            scope.allChartData.data = {
-              cols: data.graph_data.cols,
-              rows: rows
-            };
-
-            scope.allChartData.cssStyle = "height:500px; width: 100%";
-            scope.allChartData.options = {
-              "title": "Crime Incidents per month",
-              "fill": 20,
-              "displayExactValues": true,
-              "hAxis": {
-                "title": "Date"
-              },
-              "vAxis": {
-                "title": "Incident Count"
-              },
-              'chartArea':{
-                'width': '80%',
-                'height': '80%'
-              },
-              'legend': {
-                'position': 'bottom'
+              var rows = [];
+              for(var x = 0; x < data.graph_data.rows.length; x++){
+                var row;
+                row = data.graph_data.rows[x];
+                row.c[0].v = new Date(row.c[0].v);
+                rows.push(row);
               }
-            };
 
-            scope.updateChart();
-          })
-        }
+              scope.allChartData = {};
+              scope.allChartData.type = scope.chartType;
+              scope.allChartData.data = {
+                cols: data.graph_data.cols,
+                rows: rows
+              };
 
-        scope.reloadData();
+              scope.allChartData.cssStyle = "height:500px; width: 100%";
+              scope.allChartData.options = {
+                "isStacked": true,
+                "title": scope.getChartTitle(),
+                "fill": 20,
+                "displayExactValues": true,
+                "hAxis": {
+                  "title": "Date"
+                },
+                "vAxis": {
+                  "title": "Incident Count"
+                },
+                'chartArea':{
+                  'width': '80%',
+                  'height': '80%'
+                },
+                'legend': {
+                  'position': 'bottom'
+                }
+              };
 
-        scope.filterByDate = function(chartData){
-          var start_date_pos;
-          var end_date_pos;
+              scope.updateChart();
+              scope.loading = false;
+            })
+          }
 
-          start_date_pos = scope.getDatePos($scope.start_date, chartData);
-          end_date_pos = scope.getDatePos($scope.end_date, chartData);
+          scope.reloadData();
 
-          return scope.getChartDataSubset(
-            start_date_pos, end_date_pos, chartData
-          );
-        }
+          scope.filterByDate = function(chartData){
+            var start_date_pos;
+            var end_date_pos;
 
-        scope.getChartDataSubset = function(start_pos, end_pos, chartData){
-          // Remove starting elements
-          chartData.data.rows.splice(0, start_pos);
+            start_date_pos = scope.getDatePos(scope.start_date, chartData);
+            end_date_pos = scope.getDatePos(scope.end_date, chartData);
 
-          // Remove ending elements
-          chartData.data.rows.splice(end_pos, chartData.data.rows.length);
+            return scope.getChartDataSubset(
+              start_date_pos, end_date_pos, chartData
+            );
+          }
 
-          return chartData;
-        }
+          scope.getChartDataSubset = function(start_pos, end_pos, chartData){
+            // Remove starting elements
+            chartData.data.rows.splice(0, start_pos);
 
-        scope.getDatePos = function(date, chartData){
-          for(var x = 0; x < chartData.data.rows.length; x++){
-            var year = chartData.data.rows[x].c[0].v.getYear();
-            var month = chartData.data.rows[x].c[0].v.getMonth();
+            // Remove ending elements
+            chartData.data.rows.splice(end_pos, chartData.data.rows.length);
 
-            if(date.getYear() == year && date.getMonth() == month){
-              return x;
+            return chartData;
+          }
+
+          scope.getDatePos = function(date, chartData){
+            for(var x = 0; x < chartData.data.rows.length; x++){
+              var year = chartData.data.rows[x].c[0].v.getYear();
+              var month = chartData.data.rows[x].c[0].v.getMonth();
+
+              if(date.getYear() == year && date.getMonth() == month){
+                return x;
+              }
             }
           }
-        }
 
-        scope.filterColumns = function(chartData){
-          var removeCols = scope.getNotSelectedCols();
+          scope.filterColumns = function(chartData){
+            var removeCols = scope.getNotSelectedCols();
 
-          for(var x = 0; x < removeCols.length; x++){
-            scope.removeField(removeCols[x], chartData);
+            for(var x = 0; x < removeCols.length; x++){
+              scope.removeField(removeCols[x], chartData);
+            }
+
+            return chartData;
           }
 
-          return chartData;
-        }
+          scope.updateChart = function(){
+            var chartData = angular.copy(scope.allChartData);
+            chartData = scope.filterColumns(chartData);
 
-        scope.updateChart = function(){
-          var chartData = angular.copy(scope.allChartData);
-          chartData = scope.filterColumns(chartData);
+            if(scope.start_date && scope.end_date){
+              chartData = scope.filterByDate(chartData);
+            }
 
-          if(scope.start_date && $scope.end_date){
-            chartData = scope.filterByDate(chartData);
+            var tableChart = angular.copy(chartData);
+            tableChart.type = "Table";
+
+            // Update charts
+            scope.chart = chartData;
           }
 
-          var tableChart = angular.copy(chartData);
-          tableChart.type = "Table";
-
-          // Update charts
-          scope.chart = chartData;
-        }
-
-        scope.getNotSelectedCols = function(){
+          scope.getNotSelectedCols = function(){
           var notSelectedCols = [];
 
           angular.forEach(scope.group_by_choices, function(val, key){
@@ -176,5 +229,4 @@ angular.module('crimestatsApp')
       }
     }
   }
-  ]
-);
+]);

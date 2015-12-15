@@ -1,5 +1,12 @@
 <div class="row">
     <div class="col-md-2">
+        <strong>Aggregate Period</strong>
+        <div class="form-group">
+            <select ng-model="aggPeriod" class="form-control">
+                <option value="year">Year</option>
+                <option value="month">Month</option>
+            </select>
+        </div>
         <strong>Date Range:</strong>
         <div class="form-group">
             <input type="text" class="form-control" ng-model="start_date"
@@ -28,11 +35,11 @@
         </div>
     </div>
     <div class="col-md-10">
-        <div google-chart chart="chart" style="{{chart.cssStyle}}">
-            <div class="loading-message loading-message-large">
-                <div>Loading</div>
-                <i class="fa fa-refresh fa-spin"></i>
-            </div>
+        <div class="loading-message loading-message-large" ng-if="loading">
+            <div>Loading</div>
+            <i class="fa fa-refresh fa-spin"></i>
+        </div>
+        <div google-chart chart="chart" style="{{chart.cssStyle}}" ng-show="!loading">
         </div>
     </div>
 </div>
