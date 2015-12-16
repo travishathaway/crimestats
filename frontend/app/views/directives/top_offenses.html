@@ -1,3 +1,13 @@
+<div class="row">
+    <div class="col-md-8">
+        <h4>Top Five Offense in {{year.substring(0, 4)}}</h4>
+    </div>
+    <div class="col-md-4">
+        <select ng-model="year" class="form-control"
+                ng-options="key as value for (key, value) in years">
+        </select>
+    </div>
+</div>
 <div class="loading-message loading-message-large" ng-if="loading">
     <div>Loading</div>
     <i class="fa fa-refresh fa-spin"></i>

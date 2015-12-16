@@ -18,11 +18,22 @@ angular.module('crimestatsApp')
         templateUrl: 'views/directives/top_offenses.html',
         restrict: 'E',
         link: function postLink(scope, element, attrs) {
-          scope.loading = true;
+          var neighborhood;
+
+          if( scope.neighborhood.toLowerCase() === 'all' ){
+            neighborhood = '';
+          } else {
+            neighborhood = scope.neighborhood;
+          }
+
           var params = {
-            neighborhood: scope.neighborhood,
+            neighborhood: neighborhood,
             format: 'keyed'
           };
+
+          // Initialize scope variables
+          scope.loading = true;
+          scope.years = [];
 
           scope.chart = {
             type: "BarChart",
@@ -48,7 +59,7 @@ angular.module('crimestatsApp')
 
           scope.setChartRows = function() {
             // Get the last index of the date list
-            var idx = scope.data['date'].length - 1;
+            var idx = scope.data['date'].indexOf(scope.year);
             var top_offs = [];
             var rows = [];
 
@@ -81,8 +92,28 @@ angular.module('crimestatsApp')
             scope.chart.data.rows = rows;
           };
 
+          scope.setYearChoices = function(){
+            var years = scope.data['date'];
+            scope.year = years[years.length - 1];
+
+            for(var x = 0; x < years.length; x++){
+              var cur_year = years[x];
+
+              scope.years[cur_year] = cur_year.substring(0, 4);
+            }
+          };
+
+          scope.$watch('year', function(newVal, oldVal){
+            if(newVal){
+              if(newVal !== oldVal){
+                scope.setChartRows();
+              }
+            }
+          });
+
           offensetype.get(params).then(function(data){
             scope.data = data.data;
+            scope.setYearChoices();
             scope.setChartRows();
           }).finally(function(){
             scope.loading = false;

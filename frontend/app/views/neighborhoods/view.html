@@ -1,4 +1,18 @@
-<h2>{{neighborhood|capitalize:true}}</h2>
+<div class="row">
+    <div class="col-md-10">
+        <div ng-if="neighborhood.toLowerCase() === 'all'">
+            <h2>Portland</h2>
+        </div>
+        <div ng-if="neighborhood.toLowerCase() !== 'all'">
+            <h2>{{neighborhood|capitalize:true}}</h2>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <a href="#/neighborhoods" title="Neighborhoods">
+            <strong>All Neighborhoods</strong>
+        </a>
+    </div>
+</div>
 <hr>
 <div class="row">
     <div class="col-md-6">
@@ -9,7 +23,6 @@
         </p>
     </div>
     <div class="col-md-6">
-        <h4>Top Five Offense in 2014</h4>
         <top-offenses neighborhood="neighborhood"></top-offenses>
     </div>
 </div>
