@@ -1,0 +1,5 @@
+<div class="loading-message loading-message-large" ng-if="loading">
+    <div>Loading</div>
+    <i class="fa fa-refresh fa-spin"></i>
+</div>
+<div google-chart chart="chart" style="{{chart.cssStyle}}" ng-show="!loading"></div>

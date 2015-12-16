@@ -108,7 +108,6 @@ angular.module('crimestatsApp')
               scope.allChartData.cssStyle = "height:500px; width: 100%";
               scope.allChartData.options = {
                 "isStacked": true,
-                "title": scope.getChartTitle(),
                 "fill": 20,
                 "displayExactValues": true,
                 "hAxis": {
