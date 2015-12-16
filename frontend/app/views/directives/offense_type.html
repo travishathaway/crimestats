@@ -1,25 +1,36 @@
 <div class="row">
+    <div class="col-md-3">
+        <h4>Offense Types by Year and Month</h4>
+    </div>
     <div class="col-md-2">
-        <strong>Aggregate Period</strong>
-        <div class="form-group">
-            <select ng-model="aggPeriod" class="form-control">
-                <option value="year">Year</option>
-                <option value="month">Month</option>
-            </select>
+        <select ng-model="aggPeriod" class="form-control">
+            <option value="year">Year</option>
+            <option value="month">Month</option>
+        </select>
+    </div>
+    <div class="col-md-6">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <input type="text" class="form-control" ng-model="start_date"
+                           data-max-date="{{end_date}}" placeholder="From" bs-datepicker
+                           model-date-format="yyyy-MM-dd" min-view="1" autoclose="1">
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <input type="text" class="form-control" ng-model="end_date"
+                           data-min-date="{{start_date}}" placeholder="Until" bs-datepicker
+                           model-date-format="yyyy-MM-dd" min-view="1" autoclose="1">
+                </div>
+            </div>
         </div>
-        <strong>Date Range:</strong>
-        <div class="form-group">
-            <input type="text" class="form-control" ng-model="start_date"
-                   data-max-date="{{end_date}}" placeholder="From" bs-datepicker
-                   model-date-format="yyyy-MM-dd" min-view="1" autoclose="1">
-        </div>
-        <div class="form-group">
-            <input type="text" class="form-control" ng-model="end_date"
-                   data-min-date="{{start_date}}" placeholder="Until" bs-datepicker
-                   model-date-format="yyyy-MM-dd" min-view="1" autoclose="1">
-        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-2">
         <strong>Offense Types</strong>
-        <div class="slimscroll-body" slimscroll="{height: '325px'}">
+        <div class="slimscroll-body" slimscroll="{height: '450px'}">
             <div class="checkbox checkbox-primary" ng-repeat="type in group_by_cols">
                 <input type="checkbox" ng-model="group_by_choices[type]"
                        ng-checked="group_by_choices[type]" id="incident_check_{{$index}}"

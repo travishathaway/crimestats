@@ -1,9 +1,16 @@
 <div class="row">
-    <ul>
-        <li ng-repeat="item in data">
-            <a href="#/neighborhoods/{{item}}">
+    <div class="col-md-8">
+        <input class="form-control" ng-model="searchText" placeholder="Find your neighborhood..." />
+    </div>
+</div>
+<hr>
+<div class="row">
+    <div class="col-md-12">
+        <div class="list-group">
+            <a href="#/neighborhoods/{{item}}" ng-repeat="item in data | filter:searchText"
+                    class="list-group-item">
                 {{item|capitalize:true}}
             </a>
-        </li>
-    </ul>
+        </div>
+    </div>
 </div>

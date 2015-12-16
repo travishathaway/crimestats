@@ -145,11 +145,13 @@ angular.module('crimestatsApp')
           }
 
           scope.getChartDataSubset = function(start_pos, end_pos, chartData){
+            var end_spl_pos = end_pos - start_pos;
+
             // Remove starting elements
             chartData.data.rows.splice(0, start_pos);
 
             // Remove ending elements
-            chartData.data.rows.splice(end_pos, chartData.data.rows.length);
+            chartData.data.rows.splice(end_spl_pos, chartData.data.rows.length);
 
             return chartData;
           }
