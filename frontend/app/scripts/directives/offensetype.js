@@ -127,7 +127,7 @@ angular.module('crimestatsApp')
 
               scope.updateChart();
               scope.loading = false;
-            })
+            });
           }
 
           scope.reloadData();
