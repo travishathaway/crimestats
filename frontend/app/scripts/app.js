@@ -15,7 +15,8 @@ angular
     'ngSanitize',
     'googlechart',
     'mgcrea.ngStrap',
-    'ui.slimscroll'
+    'ui.slimscroll',
+    'openlayers-directive'
   ])
   .config(function ($routeProvider) {
     $routeProvider
@@ -29,7 +30,7 @@ angular
         controller: 'NeighborhoodListCtrl',
         controllerAs: 'neighborhood_list'
       })
-      .when('/neighborhoods/:neighborhood', {
+      .when('/neighborhoods/:neighborhood*', {
         templateUrl: 'views/neighborhoods/view.html',
         controller: 'NeighborhoodViewCtrl',
         controllerAs: 'neighborhood_view'

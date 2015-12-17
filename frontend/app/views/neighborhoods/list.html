@@ -1,16 +1,21 @@
 <div class="row">
-    <div class="col-md-8">
-        <input class="form-control" ng-model="searchText" placeholder="Find your neighborhood..." />
-    </div>
-</div>
-<hr>
-<div class="row">
-    <div class="col-md-12">
-        <div class="list-group">
-            <a href="#/neighborhoods/{{item}}" ng-repeat="item in data | filter:searchText"
-                    class="list-group-item">
-                {{item|capitalize:true}}
-            </a>
+    <div class="col-md-4">
+        <input class="form-control input-lg" ng-model="searchText" placeholder="Find your neighborhood..." />
+        <br>
+        <div class="slimscroll-body" slimscroll="{height: '500px'}">
+            <div class="list-group">
+                <a href="#/neighborhoods/{{item}}" ng-repeat="item in data | filter:searchText"
+                   class="list-group-item">
+                    {{item|capitalize:true}}
+                </a>
+            </div>
         </div>
+    </div>
+    <div class="col-md-8">
+        <openlayers ol-center="portland_center" width="100%" height="600px"
+                custom-layers="true" ol-defaults="defaults">
+            <ol-layer ol-layer-properties="mapquest"></ol-layer>
+           <ol-layer ol-layer-properties="neighborhoods_layer"></ol-layer>
+        </openlayers>
     </div>
 </div>

@@ -31,7 +31,34 @@ angular.module('crimestatsApp').controller(
         function(data){
           $scope.data = data.data;
         }
-      )
+      );
+
+      $scope.mapquest = {
+        source: {
+            type: 'MapQuest',
+            layer: 'osm'
+        }
+      };
+
+      $scope.portland_center = {
+        lat: 45.533452,
+        lon: -122.65,
+        zoom: 11.5
+      };
+
+      $scope.neighborhoods_layer = {
+        name: 'portland_neighborhoods',
+        source: {
+            type: 'GeoJSON',
+            url: 'geojson/neighborhoods.geojson'
+        },
+      };
+
+      $scope.defaults = {
+        events: {
+          layers: [ 'mousemove', 'click' ]
+        }
+      };
     }
   ]
 ).controller(
