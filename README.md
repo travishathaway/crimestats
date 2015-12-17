@@ -20,7 +20,7 @@ npm install
 ```
 
 ### Python Dependencies
-It is highly recommended that you use miniconda in order to install python dependencies.  When miniconda is installed, run the following two commands to install dependencies from the root of the repository:
+It is highly recommended that you use [miniconda](http://conda.pydata.org/miniconda.html) in order to install python dependencies.  When miniconda is installed, run the following two commands to install dependencies from the root of the repository:
 ```bash
 pip install -r requirements.txt
 conda install --file conda_requirements.txt
