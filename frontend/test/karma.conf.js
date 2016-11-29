@@ -42,6 +42,8 @@ module.exports = function(config) {
       'bower_components/angular-google-chart/ng-google-chart.js',
       'bower_components/angular-strap/dist/angular-strap.js',
       'bower_components/angular-strap/dist/angular-strap.tpl.js',
+      'bower_components/slimScroll/jquery.slimscroll.js',
+      'bower_components/slimScroll/jquery.slimscroll.min.js',
       'bower_components/angular-slimscroll/angular-slimscroll.js',
       'bower_components/openlayers3/build/ol.js',
       'bower_components/angular-openlayers-directive/dist/angular-openlayers-directive.min.js',

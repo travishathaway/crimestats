@@ -21,7 +21,6 @@ db = SQLAlchemy(app)
 
 from .models import (
     CrimeStats, CrimeStatsYearMonth, IncidentCount,
-    PortlandPopulation
 )
 
 api.add_resource(CrimeStatsAPI, '/crime_stats')
@@ -34,4 +33,3 @@ def before_request():
     g.CrimeStats = CrimeStats
     g.IncidentCount = IncidentCount
     g.CrimeStatsYearMonth = CrimeStatsYearMonth
-    g.PortlandPopulation = PortlandPopulation

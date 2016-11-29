@@ -6,7 +6,7 @@ class CrimeStats(db.Model):
     __tablename__ = 'portland_crime_stats'
 
     record_id = db.Column(db.Integer, primary_key=True)
-    report_date = db.Column(db.Date)
+    report_date = db.Column(db.Date, primary_key=True)
     report_time = db.Column(db.Time)
     major_offense_type = db.Column(db.String, nullable=False)
     address = db.Column(db.String, nullable=False)
@@ -33,27 +33,6 @@ class CrimeStats(db.Model):
             'y_coordinate': self.y_coordinate
         }
 
-class CrimeStatsYearMonth(db.Model):
-    __tablename__ = 'major_offense_type_by_year_month'
-    __table_args__ = {
-        'autoload': True,
-        'autoload_with': db.engine
-    }
-
-    major_offense_type = db.Column(db.String, primary_key=True)
-    date = db.Column(db.Date, primary_key=True)
-    count = db.Column(db.Integer)
-
-    def to_dict(self):
-        """
-        Render object to dictionary
-        """
-        return {
-            'major_offense_type': self.major_offense_type,
-            'date': self.date.isoformat(),
-            'count': self.count
-        }
-
 
 class IncidentCount(db.Model):
     __tablename__ = 'incident_counts'
@@ -65,11 +44,3 @@ class IncidentCount(db.Model):
     count = db.Column(db.Integer, nullable=False)
     population = relationship("PortlandPopulation", uselist=False,
                               backref="incident_counts")
-
-
-class PortlandPopulation(db.Model):
-    __tablename__ = 'portland_population_2000_2014'
-
-    index = db.Column(db.Integer, primary_key=True)
-    date = db.Column(db.Date, db.ForeignKey('incident_counts.date'), nullable=False)
-    pop = db.Column(db.Integer, nullable=False)

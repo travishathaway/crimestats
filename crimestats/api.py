@@ -1,5 +1,3 @@
-from __future__ import absolute_import
-
 import pandas as pd
 from flask import g
 from flask_restful import Resource
@@ -8,6 +6,30 @@ from webargs.flaskparser import use_args
 from sqlalchemy import func
 
 from . import utils as u_
+
+
+def format_response(df, f_type):
+    """
+    Return the desired format of the response
+
+    :param df: pandas.DataFrame
+    :param f_type: String
+
+    :return: Dictionary
+    """
+    if f_type == 'keyed':
+        resp = df.to_dict(orient='list')
+    # Default return type
+    else:
+        results, cols = u_.format_for_google_chart(df)
+        # Remove the date column
+        cols.pop(0)
+        resp = {
+            'cols': cols,
+            'graph_data': results
+        }
+
+    return resp
 
 
 class CrimeStatsAPI(Resource):
@@ -26,26 +48,6 @@ class CrimeStatsAPI(Resource):
         ),
         'neighborhood': fields.Str()
     }
-
-    def format_response(self, df, f_type):
-        """
-        Return the desired format of the response
-        :param f_type: String
-        :return: Dictionary
-        """
-        if f_type == 'keyed':
-            resp = df.to_dict(orient='list')
-        # Default return type
-        else:
-            results, cols = u_.format_for_google_chart(df)
-            # Remove the date column
-            cols.pop(0)
-            resp = {
-                'cols': cols,
-                'graph_data': results
-            }
-
-        return resp
 
     @use_args(crime_stats_args)
     def get(self, args):
@@ -83,8 +85,9 @@ class CrimeStatsAPI(Resource):
         )
 
         # Let pandas execute the SQL statement to load it straight in to
-        # the Dataframe.
+        # the Data Frame.
         df = pd.read_sql_query(query.selectable, g.db.engine)
+
         if not df.empty:
             df = df.pivot_table(
                 index=['date'], columns=['group_by_col']
@@ -93,7 +96,8 @@ class CrimeStatsAPI(Resource):
             df = df.reset_index(level=0)
             df = u_.add_all_count(df)
 
-        return self.format_response(df, args.get('format'))
+        return format_response(df, args.get('format'))
+
 
 class NeighborhoodsAPI(Resource):
     # We use this to keep out neighborhoods with low counts
@@ -107,7 +111,8 @@ class NeighborhoodsAPI(Resource):
         :return: Dictionary
         """
         cte_query = g.db.session.query(
-            g.IncidentCount.neighborhood, func.sum(g.IncidentCount.count).label('count')
+            g.IncidentCount.neighborhood,
+            func.sum(g.IncidentCount.count).label('count')
         ).group_by(g.IncidentCount.neighborhood).cte(name='hood_counts')
 
         results = g.db.session.query(
@@ -115,7 +120,7 @@ class NeighborhoodsAPI(Resource):
         ).filter(
             cte_query.c.count > 250
         ).filter(
-            cte_query.c.neighborhood != None
+            cte_query.c.neighborhood is not None
         ).order_by(
             cte_query.c.neighborhood
         ).all()
