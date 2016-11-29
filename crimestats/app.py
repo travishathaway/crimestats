@@ -20,7 +20,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = db_uri
 db = SQLAlchemy(app)
 
 from .models import (
-    CrimeStats, CrimeStatsYearMonth, IncidentCount,
+    CrimeStats, IncidentCount,
 )
 
 api.add_resource(CrimeStatsAPI, '/crime_stats')
@@ -32,4 +32,3 @@ def before_request():
     g.db = db
     g.CrimeStats = CrimeStats
     g.IncidentCount = IncidentCount
-    g.CrimeStatsYearMonth = CrimeStatsYearMonth
