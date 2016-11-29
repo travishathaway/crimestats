@@ -65,3 +65,5 @@ frontend/bower_components
 frontend/.tmp
 frontend/.sass-cache
 .idea
+
+crimestats.ini
