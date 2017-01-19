@@ -4,6 +4,9 @@ Welcome to the Crime Stats web app.  This application is a combination of an Ang
 
 The web application currently has no active URL (sorry).
 
+## Screenshots
+![cover](http://i.imgur.com/O8OtHbi.png)
+
 ## Installation
 To install the required dependencies you will need Python, NPM and Bower installed on your host machine.
 
