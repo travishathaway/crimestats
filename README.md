@@ -11,13 +11,13 @@ The web application currently has no active URL (sorry).
 To install the required dependencies you will need Python, NPM and Bower installed on your host machine.
 
 ### Bower Dependencies
-To instal bower dependencies run the following command from the `frontend` directory:
+To install bower dependencies run the following command from the `frontend` directory:
 ```bash
 bower install
 ```
 
 ### NPM Dependencies
-To instal NPM dependencies run the following command from the `frontend` directory:
+To install NPM dependencies run the following command from the `frontend` directory:
 ```bash
 npm install
 ```
