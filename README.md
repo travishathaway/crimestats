@@ -2,7 +2,10 @@
 
 Welcome to the Crime Stats web app.  This application is a combination of an AngularJS and Flask app.  This app was primarily developed to work with datasets of reported crimes occurring in Portland, Oregon, but could concieveably be used for any city/region so long as the data is stored in the database accordingly.
 
-The web application currently has no active URL (sorry).
+**[Visit Website](https://crimestats.travishathaway.com)**
+
+## Screenshots
+![cover](http://i.imgur.com/O8OtHbi.png)
 
 ## Installation
 To install the required dependencies you will need Python, NPM and Bower installed on your host machine.
