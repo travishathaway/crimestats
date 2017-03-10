@@ -40,6 +40,11 @@ angular
         controller: 'OffenseTypeCtrl',
         controllerAs: 'offense_type'
       })
+      .when('/map', {
+        templateUrl: 'views/map.html',
+        controller: 'MapController',
+        controllerAs: 'map'
+      })
       .otherwise({
         redirectTo: '/'
       });

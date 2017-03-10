@@ -1,0 +1,18 @@
+<div class="row">
+    <div class="col-md-9">
+        <openlayers ol-center="portland_center" width="100%" height="600px"
+            ol-defaults="defaults">
+            <ol-layer ol-layer-properties="census_tracts"></ol-layer>
+        </openlayers>
+    </div>
+    <div class="col-md-3">
+        <h2>{{title}}</h2>
+
+        <div ng-show="current_census_tract_name">
+            <b>Census Tract: </b>{{current_census_tract_name}}
+        </div>
+        <div ng-show="current_census_tract_pop">
+            <b>Census Population: </b>{{current_census_tract_pop}}
+        </div>
+    </div>
+</div>
