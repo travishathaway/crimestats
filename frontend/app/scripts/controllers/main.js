@@ -106,12 +106,28 @@ angular.module('crimestatsApp').controller(
   'MapController', [
     '$scope', '$http', '$routeParams', 'olHelpers', 'olData',
     function ($scope, $http, $routeParams, olHelpers, olData) {
+      $scope.geojson_file_choices = {
+          2004: 'geojson/census_tracts_2004.json',
+          2005: 'geojson/census_tracts_2005.json',
+          2006: 'geojson/census_tracts_2006.json',
+          2007: 'geojson/census_tracts_2007.json',
+          2008: 'geojson/census_tracts_2008.json',
+          2009: 'geojson/census_tracts_2009.json',
+          2010: 'geojson/census_tracts_2010.json',
+          2011: 'geojson/census_tracts_2011.json',
+          2012: 'geojson/census_tracts_2012.json',
+          2013: 'geojson/census_tracts_2013.json',
+          2014: 'geojson/census_tracts_2014.json',
+      }
+
+      $scope.geojson_file = $scope.geojson_file_choices[2004];
+
       $scope.title = 'Map of Population and Crime Reports';
       $scope.portland_center = {
         lat: 45.533452,
         lng: -122.65,
         lon: -122.60,
-        zoom: 11.5
+        zoom: 11.5,
       };
 
       // Get the countries geojson data from a JSON
@@ -131,18 +147,39 @@ angular.module('crimestatsApp').controller(
         });
       });
 
+      var sourceTemplate = {
+          type: 'GeoJSON',
+          geojson: {
+              object: {}
+          }
+      };
+
+      $scope.$watch('geojson_file', function(newVal, oldVal){
+        if(newVal){
+          if(newVal !== oldVal){
+            //$scope.census_tracts.source.layer
+            $http.get($scope.geojson_file).success(function(data, status){
+              console.log(data);
+              $scope.census_tracts.source = angular.copy(sourceTemplate);
+              $scope.census_tracts.source.geojson.object = data;
+            });
+          }
+        }
+      });
+
       var getColor = function(d){
-        return d > 0 && d < 2000 ? '#CC0066' :
-          d >= 2000 && d < 4000 ? '#993366' :
-          d >= 4000 && d < 6000 ? '#990066' :
-          d >= 6000 ? '#CC3399' :
+        return d > 0 && d < 75 ? '#ffffb2' :
+          d >= 75 && d < 300 ? '#fecc5c' :
+          d >= 300 && d < 600 ? '#fd8d3c' :
+          d >= 600 && d < 800 ? '#f03b20' :
+          d >= 800 ? '#bd0026' :
               '#FFFFFF';
       }
 
       var getStyle = function(feature){
           var style = olHelpers.createStyle({
                 fill: {
-                    color: getColor(feature.get('pop10')),
+                    color: getColor(feature.get('report_count')),
                     opacity: 0.4
                 },
                 stroke: {
@@ -166,7 +203,7 @@ angular.module('crimestatsApp').controller(
         name: 'census_tracts',
         source: {
           type: 'GeoJSON',
-          url: 'geojson/census_tracts.json'
+          url: 'geojson/census_tracts_2014.json'
         },
         style: getStyle,
         visible: true,
@@ -177,7 +214,7 @@ angular.module('crimestatsApp').controller(
           var previousFeature; 
           $scope.$on('openlayers.layers.census_tracts.mousemove', function(event, feature, olEvent){
             $scope.$apply(function(scope){
-              scope.current_census_tract_name = feature.get('namelsad10');
+              scope.current_census_tract_name = feature.get('report_count');
               scope.current_census_tract_pop = feature.get('pop10');
             });
 

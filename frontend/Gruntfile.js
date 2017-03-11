@@ -427,7 +427,7 @@ module.exports = function (grunt) {
             '*.{ico,png,txt}',
             '*.html',
             'images/{,*/}*.{jpg,png}',
-            'geojson/{,*/}*.{geojson}',
+            'geojson/{,*/}*.{geojson,json}',
             'fonts/{,*/}*.*'
           ]
         }, {

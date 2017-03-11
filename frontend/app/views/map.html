@@ -8,8 +8,12 @@
     <div class="col-md-3">
         <h2>{{title}}</h2>
 
+        <select ng-model="geojson_file" class="form-control"
+            ng-options="value as key for (key, value) in geojson_file_choices">
+        </select>
+
         <div ng-show="current_census_tract_name">
-            <b>Census Tract: </b>{{current_census_tract_name}}
+            <b>Crime Report Count: </b>{{current_census_tract_name}}
         </div>
         <div ng-show="current_census_tract_pop">
             <b>Census Population: </b>{{current_census_tract_pop}}
