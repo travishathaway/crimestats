@@ -139,3 +139,56 @@ body {
   font-size: 1.8em;
 }
 /* End Loading message */
+
+/* Map CSS */
+.map-page {
+  margin-top: -20px;
+  margin-left: -15px;
+
+  h1,h2,h3,h4,h5,h6 {
+    margin-top: 15px;
+  }
+}
+
+.map-legend .choropleth-key-square {
+  height: 15px;
+  width: 15px;
+  border: 1px solid #888;
+  display: inline-block;
+}
+
+.map-legend .list-group-item {
+  padding: 3px 6px;
+}
+
+.map-legend .key-description {
+  display: inline-block;
+}
+
+.map-overlay {
+  bottom: 0;
+  left: 15px;
+  position: absolute;
+  width: 300px;
+  padding: 5px 10px;
+  /*height: 150px;*/
+  opacity: 0.85;
+  z-index: 100;
+  background-color: #333;
+  color: white;
+}
+
+.map-overlay-title {
+  position: absolute;
+  top: 0;
+  right: 15px;
+  background-color: #333;
+  color: white;
+  opacity: 0.85;
+  z-index: 100;
+  font-size: 2em;
+  padding: 5px 10px;
+}
+
+/* End Map CSS */
+

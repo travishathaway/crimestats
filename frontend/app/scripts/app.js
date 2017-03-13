@@ -16,7 +16,8 @@ angular
     'googlechart',
     'mgcrea.ngStrap',
     'ui.slimscroll',
-    'openlayers-directive'
+    'openlayers-directive',
+    'ui.bootstrap-slider'
   ])
   .config(function ($routeProvider) {
     $routeProvider

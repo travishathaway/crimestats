@@ -104,8 +104,16 @@ angular.module('crimestatsApp').controller(
   ]
 ).controller(
   'MapController', [
-    '$scope', '$http', '$routeParams', 'olHelpers', 'olData',
-    function ($scope, $http, $routeParams, olHelpers, olData) {
+    '$scope', 
+    '$http', 
+    '$routeParams',
+    '$templateCache',
+    'olHelpers',
+    'olData',
+    function ($scope, $http, $routeParams, $templateCache, olHelpers, olData) {
+      /**
+       * These are all of the available census_tract data files we have available
+       */
       $scope.geojson_file_choices = {
           2004: 'geojson/census_tracts_2004.json',
           2005: 'geojson/census_tracts_2005.json',
@@ -120,32 +128,76 @@ angular.module('crimestatsApp').controller(
           2014: 'geojson/census_tracts_2014.json',
       }
 
+      /**
+       * Start with the default year of 2004
+       */
       $scope.geojson_file = $scope.geojson_file_choices[2004];
 
-      $scope.title = 'Map of Population and Crime Reports';
-      $scope.portland_center = {
-        lat: 45.533452,
-        lng: -122.65,
-        lon: -122.60,
-        zoom: 11.5,
+      /**
+       * These are the available fields we have for setting the choropleth
+       * values.
+       */
+      $scope.choropleth_field_choices = {
+        report_density: 'Report Density',
+        report_absolute: 'Absolute Report',
+        report_per_person: 'Reports per Person'
+      }
+
+      $scope.choropleth_field_scales = {
+        report_density: [
+          '0 to 250',
+          '250 to 500',
+          '500 to 1000',
+          '1000 to 2000',
+          'greater than 2000'
+        ],
+        report_absolute: [
+          '0 to 200',
+          '200 to 400',
+          '400 to 600',
+          '600 to 800',
+          'greater than 800'
+        ],
+        report_per_person: [
+          '0 to 0.05',
+          '0.05 to 0.1',
+          '0.1 to 0.15',
+          '0.15 to 0.2',
+          'greater than 0.2'
+        ]
+      }
+
+      /**
+       * Our initial value for the choropleth map
+       */
+      $scope.choropleth_field = 'report_density';
+
+      /**
+       * Our choropleth colors
+       */
+      $scope.choropleth_colors = [
+          { color: '#ffffb2' },
+          { color: '#fecc5c' },
+          { color: '#fd8d3c' },
+          { color: '#f03b20' },
+          { color: '#bd0026' }
+      ];
+
+      $scope.getChoroplethScaleText = function($index){
+        return $scope.choropleth_field_scales[$scope.choropleth_field][$index];
       };
 
-      // Get the countries geojson data from a JSON
-      $http.get("geojson/census_tracts.json").success(function(data, status) {
-        angular.extend($scope, {
-          geojson: {
-            data: data,
-            style: {
-              fillColor: "green",
-              weight: 2,
-              opacity: 1,
-              color: 'white',
-              dashArray: '3',
-              fillOpacity: 0.7
-            }
-          }
-        });
-      });
+      /*
+       * Page title
+       */
+      $scope.title = 'Map of Population and Crime Reports in Portland, OR';
+
+      $scope.portland_center = {
+        lat: 45.533452,
+        lng: -122.6,
+        lon: -122.65,
+        zoom: 11.5,
+      };
 
       var sourceTemplate = {
           type: 'GeoJSON',
@@ -154,84 +206,209 @@ angular.module('crimestatsApp').controller(
           }
       };
 
-      $scope.$watch('geojson_file', function(newVal, oldVal){
-        if(newVal){
-          if(newVal !== oldVal){
-            //$scope.census_tracts.source.layer
-            $http.get($scope.geojson_file).success(function(data, status){
-              console.log(data);
-              $scope.census_tracts.source = angular.copy(sourceTemplate);
-              $scope.census_tracts.source.geojson.object = data;
-            });
-          }
+      /**
+       * Cache object to avoid multiple requests
+       */
+      $scope.geojson_cache = {};
+
+      $scope.updateMap = function(geojson_file){
+        var data = $scope.geojson_cache[geojson_file];
+        var cur_layer = angular.copy($scope.layers[0]);
+
+        if( data !== undefined){
+          $scope.layers.splice(0, 1)
+
+          cur_layer.source = angular.copy(sourceTemplate);
+          cur_layer.source.geojson.object = data;
+          cur_layer.style = $scope.color_func_mappers[$scope.choropleth_field];
+          $scope.layers.push(cur_layer);
+
+        } else {
+          $http(
+              {url: geojson_file, method: 'GET'}
+          ).success(function(data, status){
+            $scope.geojson_cache[geojson_file] = data;
+            
+            $scope.layers[0].source = angular.copy(sourceTemplate);
+            $scope.layers[0].source.geojson.object = data;
+            $scope.layers[0].style = $scope.color_func_mappers[$scope.choropleth_field];
+          });
         }
-      });
+      };
 
-      var getColor = function(d){
-        return d > 0 && d < 75 ? '#ffffb2' :
-          d >= 75 && d < 300 ? '#fecc5c' :
-          d >= 300 && d < 600 ? '#fd8d3c' :
-          d >= 600 && d < 800 ? '#f03b20' :
-          d >= 800 ? '#bd0026' :
-              '#FFFFFF';
-      }
+      $scope.slideStopCallBack = function($event, value){
+        var geojson_file = $scope.geojson_file_choices[value];
 
-      var getStyle = function(feature){
-          var style = olHelpers.createStyle({
-                fill: {
-                    color: getColor(feature.get('report_count')),
-                    opacity: 0.4
-                },
-                stroke: {
-                    color: 'white',
-                    width: 3
-                }
-            });
+        if(geojson_file !== undefined){
+          $scope.updateMap(geojson_file);
+        }
+      };
+
+      var getStyleReportDensity = function(feature){
+        var colorFunc = function(feature){
+          var d = feature.get('report_count') / feature.get('sq_miles');
+
+          return d > 0 && d < 250 ? '#ffffb2' :
+            d >= 250 && d < 500 ? '#fecc5c' :
+            d >= 500 && d < 1000 ? '#fd8d3c' :
+            d >= 1000 && d < 2000 ? '#f03b20' :
+            d >= 2000 ? '#bd0026' :
+                '#FFFFFF';
+        }
+
+        var style = olHelpers.createStyle({
+          fill: {
+            color: colorFunc(feature),
+            opacity: 0.4
+          },
+          stroke: {
+            color: 'white',
+            width: 3
+          }
+        });
+
         return [ style ];
       }
 
+      var getStyleReportAbs = function(feature){
+        var colorFunc = function(feature){
+          var d = feature.get('report_count');
+
+          return d > 0 && d < 200 ? '#ffffb2' :
+            d >= 200 && d < 400 ? '#fecc5c' :
+            d >= 400 && d < 600 ? '#fd8d3c' :
+            d >= 600 && d < 800 ? '#f03b20' :
+            d >= 800 ? '#bd0026' :
+                '#FFFFFF';
+        }
+
+        var style = olHelpers.createStyle({
+          fill: {
+            color: colorFunc(feature),
+            opacity: 0.4
+          },
+          stroke: {
+            color: 'white',
+            width: 3
+          }
+        });
+
+        return [ style ];
+      }
+
+      var getStyleReportPerPerson = function(feature){
+        var colorFunc = function(feature){
+          var d = feature.get('report_count') / feature.get('pop10');
+
+          return d > 0 && d < 0.05 ? '#ffffb2' :
+            d >= 0.05 && d < 0.1 ? '#fecc5c' :
+            d >= 0.1 && d < 0.15 ? '#fd8d3c' :
+            d >= 0.15 && d < 0.2 ? '#f03b20' :
+            d >= 0.2 ? '#bd0026' :
+                '#FFFFFF';
+        }
+
+        var style = olHelpers.createStyle({
+          fill: {
+            color: colorFunc(feature),
+            opacity: 0.4
+          },
+          stroke: {
+            color: 'white',
+            width: 3
+          }
+        });
+
+        return [ style ];
+      }
+
+      $scope.color_func_mappers = {
+        report_density: getStyleReportDensity,
+        report_absolute: getStyleReportAbs,
+        report_per_person: getStyleReportPerPerson
+      }
+
+      $scope.slider_opt = {
+        year: 2004,
+        min: 2004,
+        max: 2014,
+        step: 1
+      }
+
+      $scope.slider_value = 2004;
+
       $scope.current_census_tract_name = '';
       $scope.current_census_tract_pop = '';
+      $scope.current_report_density = '';
+      $scope.current_population_density = '';
+      $scope.current_report_over_pop = '';
 
       $scope.defaults = {
         events: {
           layers: ['mousemove', 'click']
         }
-      }
+      };
 
-      $scope.census_tracts = {
-        name: 'census_tracts',
-        source: {
-          type: 'GeoJSON',
-          url: 'geojson/census_tracts_2014.json'
-        },
-        style: getStyle,
-        visible: true,
-        opacity: 0.7
-      }
+      $scope.base_layer = {
+         name: 'Stamen',
+         active: true,
+         opacity: 0.35,
+         index: -1,
+         source: {
+           type: 'Stamen',
+           layer: 'toner'
+         }
+      };
 
-      olData.getMap().then(function(map){
-          var previousFeature; 
-          $scope.$on('openlayers.layers.census_tracts.mousemove', function(event, feature, olEvent){
-            $scope.$apply(function(scope){
-              scope.current_census_tract_name = feature.get('report_count');
-              scope.current_census_tract_pop = feature.get('pop10');
-            });
+      $scope.layers = [
+        {
+          name: 'census_tracts',
+          source: {
+            type: 'GeoJSON',
+            url: $scope.geojson_file
+          },
+          style: $scope.color_func_mappers[$scope.choropleth_field],
+          visible: true,
+          opacity: 0.65,
+        }
+      ];
 
-            if (feature) {
-              feature.setStyle(olHelpers.createStyle({
-                fill: {
-                    color: '#FFF'
-                }
-              }));
+      var previousFeature; 
 
-              if (previousFeature && feature !== previousFeature) {
-                previousFeature.setStyle(getStyle(previousFeature));
-              }
+      $scope.$watch('choropleth_field', function(newVal, oldVal){
+        if(newVal){
+          if(newVal != oldVal){
+            var geojson_file = $scope.geojson_file_choices[$scope.slider_value];
 
-              previousFeature = feature;
+            $scope.updateMap(geojson_file);
+          }
+        }
+      });
+
+      $scope.$on('openlayers.layers.census_tracts.mousemove', function(event, feature, olEvent){
+        var getStyle = $scope.color_func_mappers[$scope.choropleth_field];
+        $scope.$apply(function(scope){
+          scope.current_census_tract_name = feature.get('report_count');
+          scope.current_census_tract_pop = feature.get('pop10');
+          scope.current_report_density = feature.get('report_count') / feature.get('sq_miles');
+          scope.current_population_density = feature.get('pop10') / feature.get('sq_miles');
+          scope.current_census_tract_area = feature.get('sq_miles');
+          scope.current_report_over_pop = feature.get('report_count') / feature.get('pop10');
+        });
+
+        if (feature) {
+          feature.setStyle(olHelpers.createStyle({
+            fill: {
+              color: '#FFF'
             }
-          });
+          }));
+
+          if (previousFeature && feature !== previousFeature) {
+            previousFeature.setStyle(getStyle(previousFeature));
+          }
+
+          previousFeature = feature;
+        }
       });
     }
   ]

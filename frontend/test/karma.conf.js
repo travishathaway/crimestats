@@ -47,6 +47,8 @@ module.exports = function(config) {
       'bower_components/angular-slimscroll/angular-slimscroll.js',
       'bower_components/openlayers3/build/ol.js',
       'bower_components/angular-openlayers-directive/dist/angular-openlayers-directive.min.js',
+      'bower_components/seiyria-bootstrap-slider/dist/bootstrap-slider.js',
+      'bower_components/angular-bootstrap-slider/slider.js',
       'bower_components/angular-mocks/angular-mocks.js',
       // endbower
       "app/scripts/**/*.js",

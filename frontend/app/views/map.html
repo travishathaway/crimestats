@@ -1,22 +1,65 @@
-<div class="row">
-    <div class="col-md-9">
-        <openlayers ol-center="portland_center" width="100%" height="600px"
-            ol-defaults="defaults">
-            <ol-layer ol-layer-properties="census_tracts"></ol-layer>
-        </openlayers>
-    </div>
-    <div class="col-md-3">
-        <h2>{{title}}</h2>
-
-        <select ng-model="geojson_file" class="form-control"
-            ng-options="value as key for (key, value) in geojson_file_choices">
-        </select>
-
-        <div ng-show="current_census_tract_name">
-            <b>Crime Report Count: </b>{{current_census_tract_name}}
+<div class="map-overlay">
+    <h4>Census Tract Information</h4>
+    <table class="table table-condensed">
+        <tr>
+            <td>Crime Report Count:</td>
+            <td>{{current_census_tract_name | number}}</td>
+        </tr>
+        <tr>
+            <td>Report Density (miles<sup>2</sup>):</td>
+            <td>{{current_report_density | number:2}}</td>
+        </tr>
+        <tr>
+            <td>Population:</td>
+            <td>{{current_census_tract_pop | number}}</td>
+        </tr>
+        <tr>
+            <td>Population Density:</td>
+            <td>{{current_population_density | number:2}}</td>
+        </tr>
+        <tr>
+            <td>Reports per Person:</td>
+            <td>{{current_report_over_pop | number:2}}</td>
+        </tr>
+    </table>
+</div>
+<div class="map-page">
+    <div class="row" style="position: relative">
+        <div class="col-md-9">
+            <div class="map-overlay-title">
+                {{title}}
+            </div>
+            <openlayers ol-center="portland_center" width="100%" height="100%"
+                ol-defaults="defaults" custom-layers="true">
+                <ol-layer ng-repeat="layer in layers" ol-layer-properties="layer"></ol-layer>
+                <ol-layer ol-layer-properties="base_layer"></ol-layer>
+            </openlayers>
         </div>
-        <div ng-show="current_census_tract_pop">
-            <b>Census Population: </b>{{current_census_tract_pop}}
+        <div class="col-md-3">
+            <h3>Year {{slider_value}}</h3>
+
+            <i><small>Use slider to change year</small></i>
+            <slider ng-model="slider_value" min="slider_opt.min" step="slider_opt.step" 
+                value="slider_value" on-stop-slide="slideStopCallBack($event, value)"
+                max="slider_opt.max" tooltip="hide"></slider>
+
+            <h3>Comparison Field</h3>
+            <select ng-model="choropleth_field" class="form-control"
+                    ng-options="key as value for (key, value) in choropleth_field_choices">
+            </select>
+
+            <h3>Legend</h3>
+            <ul class="list-group map-legend">
+                <li ng-repeat="color in choropleth_colors" class="list-group-item">
+                    <div class="choropleth-key-square" style="background-color: {{color.color}}"></div>
+                    <div class="key-description">{{getChoroplethScaleText($index)}}</div>
+                </li>
+            </ul>
+            <h3>Description</h3>
+            <p>
+                This map gives you information about the number of crime reports per census
+                tract. The data for crime reports was gathering from 
+                <b><a href="http://civicapps.org/" title="Civic Apps">civicapps.org</a></b>.
         </div>
     </div>
 </div>
