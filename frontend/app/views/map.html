@@ -1,35 +1,35 @@
-<div class="map-overlay">
-    <h4>Census Tract Information</h4>
-    <table class="table table-condensed">
-        <tr>
-            <td>Crime Report Count:</td>
-            <td>{{current_census_tract_name | number}}</td>
-        </tr>
-        <tr>
-            <td>Report Density (miles<sup>2</sup>):</td>
-            <td>{{current_report_density | number:2}}</td>
-        </tr>
-        <tr>
-            <td>Population:</td>
-            <td>{{current_census_tract_pop | number}}</td>
-        </tr>
-        <tr>
-            <td>Population Density:</td>
-            <td>{{current_population_density | number:2}}</td>
-        </tr>
-        <tr>
-            <td>Reports per Person:</td>
-            <td>{{current_report_over_pop | number:2}}</td>
-        </tr>
-    </table>
-</div>
 <div class="map-page">
     <div class="row" style="position: relative">
         <div class="col-md-9">
+            <div class="map-overlay">
+                <h4>Census Tract Information</h4>
+                <table class="table table-condensed">
+                    <tr>
+                        <td>Crime Report Count:</td>
+                        <td>{{current_census_tract_name | number}}</td>
+                    </tr>
+                    <tr>
+                        <td>Report Density (miles<sup>2</sup>):</td>
+                        <td>{{current_report_density | number:2}}</td>
+                    </tr>
+                    <tr>
+                        <td>Population:</td>
+                        <td>{{current_census_tract_pop | number}}</td>
+                    </tr>
+                    <tr>
+                        <td>Population Density:</td>
+                        <td>{{current_population_density | number:2}}</td>
+                    </tr>
+                    <tr>
+                        <td>Reports per Person:</td>
+                        <td>{{current_report_over_pop | number:2}}</td>
+                    </tr>
+                </table>
+            </div>
             <div class="map-overlay-title">
                 {{title}}
             </div>
-            <openlayers ol-center="portland_center" width="100%" height="100%"
+            <openlayers ol-center="portland_center" width="100%" height="620px"
                 ol-defaults="defaults" custom-layers="true">
                 <ol-layer ng-repeat="layer in layers" ol-layer-properties="layer"></ol-layer>
                 <ol-layer ol-layer-properties="base_layer"></ol-layer>
