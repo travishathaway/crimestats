@@ -67,3 +67,5 @@ frontend/.sass-cache
 .idea
 
 crimestats.ini
+
+.DS_Store
