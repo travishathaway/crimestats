@@ -29,7 +29,7 @@
             <div class="map-overlay-title">
                 {{title}}
             </div>
-            <openlayers ol-center="portland_center" width="100%" height="620px"
+            <openlayers ol-center="portland_center" width="100%" height="93vh"
                 ol-defaults="defaults" custom-layers="true">
                 <ol-layer ng-repeat="layer in layers" ol-layer-properties="layer"></ol-layer>
                 <ol-layer ol-layer-properties="base_layer"></ol-layer>
@@ -42,6 +42,11 @@
             <slider ng-model="slider_value" min="slider_opt.min" step="slider_opt.step" 
                 value="slider_value" on-stop-slide="slideStopCallBack($event, value)"
                 max="slider_opt.max" tooltip="hide"></slider>
+
+            <h3>Offense Type</h3>
+            <select ng-model="current_offense_type" class="form-control"
+                    ng-options="value for value in offense_types">
+            </select>
 
             <h3>Comparison Field</h3>
             <select ng-model="choropleth_field" class="form-control"

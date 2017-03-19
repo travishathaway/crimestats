@@ -128,6 +128,12 @@ angular.module('crimestatsApp').controller(
           2014: 'geojson/census_tracts_2014.json',
       }
 
+      $scope.offense_types_file = 'geojson/offense_types.json';
+
+      $scope.offense_types = ['All'];
+
+      $scope.current_offense_type = 'All';
+
       /**
        * Start with the default year of 2004
        */
@@ -246,7 +252,14 @@ angular.module('crimestatsApp').controller(
 
       var getStyleReportDensity = function(feature){
         var colorFunc = function(feature){
-          var d = feature.get('report_count') / feature.get('sq_miles');
+          if($scope.current_offense_type === 'All'){
+            var count = feature.get('report_count');
+          } else {
+            var count = feature.get('report_count_by_offense')[$scope.current_offense_type];
+            count = count ? count : 0;
+          }
+
+          var d = count / feature.get('sq_miles');
 
           return d > 0 && d < 250 ? '#ffffb2' :
             d >= 250 && d < 500 ? '#fecc5c' :
@@ -272,7 +285,14 @@ angular.module('crimestatsApp').controller(
 
       var getStyleReportAbs = function(feature){
         var colorFunc = function(feature){
-          var d = feature.get('report_count');
+          if($scope.current_offense_type === 'All'){
+            var count = feature.get('report_count');
+          } else {
+            var count = feature.get('report_count_by_offense')[$scope.current_offense_type];
+            count = count ? count : 0;
+          }
+
+          var d = count;
 
           return d > 0 && d < 200 ? '#ffffb2' :
             d >= 200 && d < 400 ? '#fecc5c' :
@@ -298,7 +318,14 @@ angular.module('crimestatsApp').controller(
 
       var getStyleReportPerPerson = function(feature){
         var colorFunc = function(feature){
-          var d = feature.get('report_count') / feature.get('pop10');
+          if($scope.current_offense_type === 'All'){
+            var count = feature.get('report_count');
+          } else {
+            var count = feature.get('report_count_by_offense')[$scope.current_offense_type];
+            count = count ? count : 0;
+          }
+
+          var d = count / feature.get('pop10');
 
           return d > 0 && d < 0.05 ? '#ffffb2' :
             d >= 0.05 && d < 0.1 ? '#fecc5c' :
@@ -373,9 +400,24 @@ angular.module('crimestatsApp').controller(
         }
       ];
 
+      $http.get($scope.offense_types_file).then(function(data){
+        $scope.offense_types = $scope.offense_types.concat(data.data.offense_types);
+        console.log($scope.offense_types);
+      });
+
       var previousFeature; 
 
       $scope.$watch('choropleth_field', function(newVal, oldVal){
+        if(newVal){
+          if(newVal != oldVal){
+            var geojson_file = $scope.geojson_file_choices[$scope.slider_value];
+
+            $scope.updateMap(geojson_file);
+          }
+        }
+      });
+
+      $scope.$watch('current_offense_type', function(newVal, oldVal){
         if(newVal){
           if(newVal != oldVal){
             var geojson_file = $scope.geojson_file_choices[$scope.slider_value];
