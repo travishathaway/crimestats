@@ -174,11 +174,6 @@ angular.module('crimestatsApp').controller(
       }
 
       /**
-       * Our initial value for the choropleth map
-       */
-      $scope.choropleth_field = 'report_density';
-
-      /**
        * Our choropleth colors
        */
       $scope.choropleth_colors = [
@@ -188,6 +183,11 @@ angular.module('crimestatsApp').controller(
           { color: '#f03b20' },
           { color: '#bd0026' }
       ];
+
+      /**
+       * Our initial value for the choropleth map
+       */
+      $scope.choropleth_field = 'report_density';
 
       $scope.getChoroplethScaleText = function($index){
         return $scope.choropleth_field_scales[$scope.choropleth_field][$index];
@@ -250,7 +250,38 @@ angular.module('crimestatsApp').controller(
         }
       };
 
-      var getStyleReportDensity = function(feature){
+      // From low to high (light to dark)
+      var choropleth_colors = [
+        '#ffffb2',
+        '#fecc5c',
+        '#fd8d3c',
+        '#f03b20',
+        '#bd0026'
+      ];
+
+      var getChoroplethVal = function(value, colors, breaks){
+        if( value <= 0){
+          return '#FFFFFF';
+        }
+
+        for(var x = 0; x < colors.length; x++){
+          if( x == 0 ){
+            if(value > breaks[x] && value < breaks[x + 1]){
+              return colors[x];
+            }
+          } else if( (x + 1) == colors.length ){
+            if( value >= breaks[x] ){
+              return colors[x];
+            }
+          } else {
+            if( value >= breaks[x] && value < breaks[x + 1]){
+              return colors[x];
+            }
+          }
+        }
+      }
+
+      var getStyleObject = function(feature, breaks, dataFunc){
         var colorFunc = function(feature){
           if($scope.current_offense_type === 'All'){
             var count = feature.get('report_count');
@@ -259,14 +290,13 @@ angular.module('crimestatsApp').controller(
             count = count ? count : 0;
           }
 
-          var d = count / feature.get('sq_miles');
+          if(dataFunc){
+            var d = dataFunc(feature, count);
+          } else {
+            var d = count;
+          }
 
-          return d > 0 && d < 250 ? '#ffffb2' :
-            d >= 250 && d < 500 ? '#fecc5c' :
-            d >= 500 && d < 1000 ? '#fd8d3c' :
-            d >= 1000 && d < 2000 ? '#f03b20' :
-            d >= 2000 ? '#bd0026' :
-                '#FFFFFF';
+          return getChoroplethVal(d, choropleth_colors, breaks);
         }
 
         var style = olHelpers.createStyle({
@@ -281,72 +311,29 @@ angular.module('crimestatsApp').controller(
         });
 
         return [ style ];
+      }
+
+      var getStyleReportDensity = function(feature){
+
+        var breaks = [0, 250, 500, 1000, 2000];
+
+        return getStyleObject(feature, breaks, function(feature, count){
+          return count / feature.get('sq_miles')
+        });
       }
 
       var getStyleReportAbs = function(feature){
-        var colorFunc = function(feature){
-          if($scope.current_offense_type === 'All'){
-            var count = feature.get('report_count');
-          } else {
-            var count = feature.get('report_count_by_offense')[$scope.current_offense_type];
-            count = count ? count : 0;
-          }
+        var breaks = [0, 200, 400, 600, 800];
 
-          var d = count;
-
-          return d > 0 && d < 200 ? '#ffffb2' :
-            d >= 200 && d < 400 ? '#fecc5c' :
-            d >= 400 && d < 600 ? '#fd8d3c' :
-            d >= 600 && d < 800 ? '#f03b20' :
-            d >= 800 ? '#bd0026' :
-                '#FFFFFF';
-        }
-
-        var style = olHelpers.createStyle({
-          fill: {
-            color: colorFunc(feature),
-            opacity: 0.4
-          },
-          stroke: {
-            color: 'white',
-            width: 3
-          }
-        });
-
-        return [ style ];
+        return getStyleObject(feature, breaks);
       }
 
       var getStyleReportPerPerson = function(feature){
-        var colorFunc = function(feature){
-          if($scope.current_offense_type === 'All'){
-            var count = feature.get('report_count');
-          } else {
-            var count = feature.get('report_count_by_offense')[$scope.current_offense_type];
-            count = count ? count : 0;
-          }
+        var breaks = [0, 0.05, 0.1, 0.15, 0.2];
 
-          var d = count / feature.get('pop10');
-
-          return d > 0 && d < 0.05 ? '#ffffb2' :
-            d >= 0.05 && d < 0.1 ? '#fecc5c' :
-            d >= 0.1 && d < 0.15 ? '#fd8d3c' :
-            d >= 0.15 && d < 0.2 ? '#f03b20' :
-            d >= 0.2 ? '#bd0026' :
-                '#FFFFFF';
-        }
-
-        var style = olHelpers.createStyle({
-          fill: {
-            color: colorFunc(feature),
-            opacity: 0.4
-          },
-          stroke: {
-            color: 'white',
-            width: 3
-          }
+        return getStyleObject(feature, breaks, function(feature, count){
+          return count / feature.get('pop10')
         });
-
-        return [ style ];
       }
 
       $scope.color_func_mappers = {
@@ -402,7 +389,6 @@ angular.module('crimestatsApp').controller(
 
       $http.get($scope.offense_types_file).then(function(data){
         $scope.offense_types = $scope.offense_types.concat(data.data.offense_types);
-        console.log($scope.offense_types);
       });
 
       var previousFeature; 
