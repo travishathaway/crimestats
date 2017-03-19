@@ -55,9 +55,14 @@
 
             <h3>Legend</h3>
             <ul class="list-group map-legend">
-                <li ng-repeat="color in choropleth_colors" class="list-group-item">
-                    <div class="choropleth-key-square" style="background-color: {{color.color}}"></div>
-                    <div class="key-description">{{getChoroplethScaleText($index)}}</div>
+                <li ng-repeat="val in choropleth_classes[choropleth_field]" class="list-group-item">
+                    <div class="choropleth-key-square" style="background-color: {{choropleth_colors[$index]}}"></div>
+                    <div class="key-description" ng-if="!$last">
+                        {{val|number:2}} to {{choropleth_classes[choropleth_field][$index + 1]|number:2}}
+                    </div>
+                    <div class="key-description" ng-if="$last">
+                        greater than {{val|number:2}}
+                    </div>
                 </li>
             </ul>
             <h3>Description</h3>
@@ -65,6 +70,7 @@
                 This map gives you information about the number of crime reports per census
                 tract. The data for crime reports was gathered from 
                 <b><a href="http://civicapps.org/" title="Civic Apps">civicapps.org</a></b>.
+            </p>
         </div>
     </div>
 </div>

@@ -173,16 +173,20 @@ angular.module('crimestatsApp').controller(
         ]
       }
 
-      /**
-       * Our choropleth colors
-       */
+      // From low to high (light to dark)
       $scope.choropleth_colors = [
-          { color: '#ffffb2' },
-          { color: '#fecc5c' },
-          { color: '#fd8d3c' },
-          { color: '#f03b20' },
-          { color: '#bd0026' }
+        '#ffffb2',
+        '#fecc5c',
+        '#fd8d3c',
+        '#f03b20',
+        '#bd0026'
       ];
+
+      $scope.choropleth_classes = {
+        report_density: [0, 250, 500, 1000, 2000],
+        report_absolute:  [0, 200, 400, 600, 800],
+        report_per_person: [0, 0.05, 0.1, 0.15, 0.2]
+      };
 
       /**
        * Our initial value for the choropleth map
@@ -219,25 +223,35 @@ angular.module('crimestatsApp').controller(
 
       $scope.updateMap = function(geojson_file){
         var data = $scope.geojson_cache[geojson_file];
-        var cur_layer = angular.copy($scope.layers[0]);
+        
+        if( $scope.layers.length > 0 ){
+          var cur_layer = angular.copy($scope.layers[0]);
+        }
 
         if( data !== undefined){
           $scope.layers.splice(0, 1)
 
           cur_layer.source = angular.copy(sourceTemplate);
           cur_layer.source.geojson.object = data;
-          cur_layer.style = $scope.color_func_mappers[$scope.choropleth_field];
+          cur_layer.style = $scope.getStyle;
+
+          $scope.choropleth_classes[$scope.choropleth_field] = getChoroplethClasses(data.features);
           $scope.layers.push(cur_layer);
 
         } else {
           $http(
-              {url: geojson_file, method: 'GET'}
+            {url: geojson_file, method: 'GET'}
           ).success(function(data, status){
             $scope.geojson_cache[geojson_file] = data;
-            
+
+            $scope.choropleth_classes[$scope.choropleth_field] = getChoroplethClasses(data.features);
+
+            if($scope.layers.length == 0){
+              $scope.layers.push(angular.copy($scope.layer_template));
+            }
+
             $scope.layers[0].source = angular.copy(sourceTemplate);
             $scope.layers[0].source.geojson.object = data;
-            $scope.layers[0].style = $scope.color_func_mappers[$scope.choropleth_field];
           });
         }
       };
@@ -250,14 +264,20 @@ angular.module('crimestatsApp').controller(
         }
       };
 
-      // From low to high (light to dark)
-      var choropleth_colors = [
-        '#ffffb2',
-        '#fecc5c',
-        '#fd8d3c',
-        '#f03b20',
-        '#bd0026'
-      ];
+      var getChoroplethClasses = function(features){
+        var feature_values = [];
+
+        angular.forEach(features, function(feature){
+          var dataFunc = $scope.choropleth_class_vals_funcs[$scope.choropleth_field];
+          var value = Number(getFeatureReportCountFromObj(feature, dataFunc));
+
+          feature_values.push(value);
+        });
+
+        var g = new geostats(feature_values);
+
+        return g.getClassJenks(4);
+      };
 
       var getChoroplethVal = function(value, colors, breaks){
         if( value <= 0){
@@ -281,22 +301,45 @@ angular.module('crimestatsApp').controller(
         }
       }
 
+      var getFeatureReportCountFromObj = function(feature, dataFunc){
+        if($scope.current_offense_type === 'All'){
+          var count = feature.properties['report_count'];
+        } else {
+          var count = feature.properties['report_count_by_offense'][$scope.current_offense_type];
+          count = count ? count : 0;
+        }
+
+        if(dataFunc){
+          var d = dataFunc(feature, count);
+        } else {
+          var d = count;
+        }
+
+        return d;
+      };
+
+      var getFeatureReportCount = function(feature, dataFunc){
+        if($scope.current_offense_type === 'All'){
+          var count = feature.get('report_count');
+        } else {
+          var count = feature.get('report_count_by_offense')[$scope.current_offense_type];
+          count = count ? count : 0;
+        }
+
+        if(dataFunc){
+          var d = dataFunc(feature, count);
+        } else {
+          var d = count;
+        }
+
+        return d;
+      };
+
       var getStyleObject = function(feature, breaks, dataFunc){
         var colorFunc = function(feature){
-          if($scope.current_offense_type === 'All'){
-            var count = feature.get('report_count');
-          } else {
-            var count = feature.get('report_count_by_offense')[$scope.current_offense_type];
-            count = count ? count : 0;
-          }
+          var d = getFeatureReportCount(feature, dataFunc);
 
-          if(dataFunc){
-            var d = dataFunc(feature, count);
-          } else {
-            var d = count;
-          }
-
-          return getChoroplethVal(d, choropleth_colors, breaks);
+          return getChoroplethVal(d, $scope.choropleth_colors, breaks);
         }
 
         var style = olHelpers.createStyle({
@@ -313,34 +356,32 @@ angular.module('crimestatsApp').controller(
         return [ style ];
       }
 
-      var getStyleReportDensity = function(feature){
+      $scope.getStyle = function(feature){
+        return getStyleObject(
+          feature, $scope.choropleth_classes[$scope.choropleth_field], 
+          $scope.choropleth_class_vals_funcs[$scope.choropleth_field]
+        )
+      };
 
-        var breaks = [0, 250, 500, 1000, 2000];
-
-        return getStyleObject(feature, breaks, function(feature, count){
-          return count / feature.get('sq_miles')
-        });
-      }
-
-      var getStyleReportAbs = function(feature){
-        var breaks = [0, 200, 400, 600, 800];
-
-        return getStyleObject(feature, breaks);
-      }
-
-      var getStyleReportPerPerson = function(feature){
-        var breaks = [0, 0.05, 0.1, 0.15, 0.2];
-
-        return getStyleObject(feature, breaks, function(feature, count){
-          return count / feature.get('pop10')
-        });
-      }
-
-      $scope.color_func_mappers = {
-        report_density: getStyleReportDensity,
-        report_absolute: getStyleReportAbs,
-        report_per_person: getStyleReportPerPerson
-      }
+      $scope.choropleth_class_vals_funcs = {
+        report_density: function(feature, count){
+          if(feature.get !== undefined){
+            return count / feature.get('sq_miles');
+          } else {
+            return count / feature.properties['sq_miles'];
+          }
+        },
+        report_absolute: function(feature, count){
+          return count;
+        },
+        report_per_person: function(feature, count){
+          if(feature.get !== undefined){
+            return count / feature.get('pop10');
+          } else {
+            return count / feature.properties['pop10'];
+          }
+        }
+      };
 
       $scope.slider_opt = {
         year: 2004,
@@ -374,18 +415,16 @@ angular.module('crimestatsApp').controller(
          }
       };
 
-      $scope.layers = [
-        {
-          name: 'census_tracts',
-          source: {
-            type: 'GeoJSON',
-            url: $scope.geojson_file
-          },
-          style: $scope.color_func_mappers[$scope.choropleth_field],
-          visible: true,
-          opacity: 0.65,
-        }
-      ];
+      $scope.layer_template = $scope.layers = {
+        name: 'census_tracts',
+        source: {},
+        style: $scope.getStyle,
+        visible: true,
+        opacity: 0.65
+      }
+
+      $scope.layers = [];
+      $scope.updateMap($scope.geojson_file);
 
       $http.get($scope.offense_types_file).then(function(data){
         $scope.offense_types = $scope.offense_types.concat(data.data.offense_types);
@@ -414,7 +453,6 @@ angular.module('crimestatsApp').controller(
       });
 
       $scope.$on('openlayers.layers.census_tracts.mousemove', function(event, feature, olEvent){
-        var getStyle = $scope.color_func_mappers[$scope.choropleth_field];
         $scope.$apply(function(scope){
           scope.current_census_tract_name = feature.get('report_count');
           scope.current_census_tract_pop = feature.get('pop10');
@@ -432,7 +470,7 @@ angular.module('crimestatsApp').controller(
           }));
 
           if (previousFeature && feature !== previousFeature) {
-            previousFeature.setStyle(getStyle(previousFeature));
+            previousFeature.setStyle($scope.getStyle(previousFeature));
           }
 
           previousFeature = feature;
