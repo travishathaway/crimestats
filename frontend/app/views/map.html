@@ -6,7 +6,7 @@
                 <table class="table table-condensed">
                     <tr>
                         <td>Crime Report Count:</td>
-                        <td>{{current_census_tract_name | number}}</td>
+                        <td>{{current_report_count | number}}</td>
                     </tr>
                     <tr>
                         <td>Report Density (miles<sup>2</sup>):</td>
@@ -56,12 +56,17 @@
             <h3>Legend</h3>
             <ul class="list-group map-legend">
                 <li ng-repeat="val in choropleth_classes[choropleth_field]" class="list-group-item">
-                    <div class="choropleth-key-square" style="background-color: {{choropleth_colors[$index]}}"></div>
-                    <div class="key-description" ng-if="!$last">
-                        {{val|number:2}} to {{choropleth_classes[choropleth_field][$index + 1]|number:2}}
-                    </div>
-                    <div class="key-description" ng-if="$last">
-                        greater than {{val|number:2}}
+                    <div ng-if="!$last">
+                        <div class="choropleth-key-square" style="background-color: {{choropleth_colors[$index]}}"></div>
+                        <div class="key-description" ng-if="choropleth_field == 'report_density'">
+                            {{val|number:2}} to {{choropleth_classes[choropleth_field][$index + 1]|number:2}}
+                        </div>
+                        <div class="key-description" ng-if="choropleth_field == 'report_absolute'">
+                            {{val|number}} to {{choropleth_classes[choropleth_field][$index + 1]|number}}
+                        </div>
+                        <div class="key-description" ng-if="choropleth_field == 'report_per_person'">
+                            {{val|number:4}} to {{choropleth_classes[choropleth_field][$index + 1]|number:4}}
+                        </div>
                     </div>
                 </li>
             </ul>

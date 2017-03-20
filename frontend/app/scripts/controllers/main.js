@@ -276,7 +276,7 @@ angular.module('crimestatsApp').controller(
 
         var g = new geostats(feature_values);
 
-        return g.getClassJenks(4);
+        return g.getClassJenks(5);
       };
 
       var getChoroplethVal = function(value, colors, breaks){
@@ -348,8 +348,8 @@ angular.module('crimestatsApp').controller(
             opacity: 0.4
           },
           stroke: {
-            color: 'white',
-            width: 3
+              color: 'rgba(20, 20, 20, 0.4)',
+            width: 2
           }
         });
 
@@ -405,13 +405,15 @@ angular.module('crimestatsApp').controller(
       };
 
       $scope.base_layer = {
-         name: 'Stamen',
+         name: 'BingMaps',
          active: true,
-         opacity: 0.35,
+         opacity: 0.85,
          index: -1,
          source: {
-           type: 'Stamen',
-           layer: 'toner'
+           type: 'BingMaps',
+           key: "Aj6XtE1Q1rIvehmjn2Rh1LR2qvMGZ-8vPS9Hn3jCeUiToM77JFnf-kFRzyMELDol",
+           imagerySet: "Road"
+           //layer: 'toner'
          }
       };
 
@@ -420,7 +422,7 @@ angular.module('crimestatsApp').controller(
         source: {},
         style: $scope.getStyle,
         visible: true,
-        opacity: 0.65
+        opacity: 0.55
       }
 
       $scope.layers = [];
@@ -454,18 +456,23 @@ angular.module('crimestatsApp').controller(
 
       $scope.$on('openlayers.layers.census_tracts.mousemove', function(event, feature, olEvent){
         $scope.$apply(function(scope){
-          scope.current_census_tract_name = feature.get('report_count');
+          if( scope.current_offense_type == 'All' ){
+            var count = feature.get('report_count');
+          } else {
+            var count = feature.get('report_count_by_offense')[scope.current_offense_type];
+          }
+          scope.current_report_count = count;
           scope.current_census_tract_pop = feature.get('pop10');
-          scope.current_report_density = feature.get('report_count') / feature.get('sq_miles');
+          scope.current_report_density = count / feature.get('sq_miles');
           scope.current_population_density = feature.get('pop10') / feature.get('sq_miles');
           scope.current_census_tract_area = feature.get('sq_miles');
-          scope.current_report_over_pop = feature.get('report_count') / feature.get('pop10');
+          scope.current_report_over_pop = count / feature.get('pop10');
         });
 
         if (feature) {
           feature.setStyle(olHelpers.createStyle({
             fill: {
-              color: '#FFF'
+              color: '#929292'
             }
           }));
 
